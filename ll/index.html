@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<!--
+B Cutten
+Oct 27 2017
+This is my take on the classic Lunar Lander game
+TO DO
+-sound effects
+-randomize ship's starting parameters - (amount of fuel should be based on distance from ship to platform)
+-make sure platform is actually on the screen (and not covered in dirt! - check heights close to xPos an shift accordingly)
+-clean up game loop
+-fav icon
+-make ship either not go off screen, die, or loop around
+-->
+<html>
+    <head>
+        <title>Lunatic Lander</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    </head>
+    <body>
+
+        <canvas id="canvas" width="800" height="600" style="border:1px white" tabindex="1"></canvas>
+        <script>
+
+            //lander
+            var landerImg = new Image();
+            //landing pad
+            var padImg = new Image();
+            //planet
+            var planet = new Image();
+            //logo
+            var logo = new Image();
+            
+            //size
+            var shipHeight = 20;
+            var shipWidth = 20;
+            //position
+            var x = 200;
+            var y = 200;
+            //POSITIVE IS DOWN
+            //speed
+            var dx = 0;
+            var dy = 0;
+
+            var thrustPower = 0.03; 
+
+            //gravity constant
+            var gravity = 0.01;
+
+            //ground
+            var groundLevel;             
+            var points = []; //empty array
+            //stars
+            var stars = [];
+            
+            //landing pad
+            var lpX;
+            var lpY;
+            var lpWidth;
+            var lpHeight;
+
+            var fuel;
+
+            //screen
+            var ctx;
+            var WIDTH;
+            var HEIGHT;
+
+            //key presses
+            var thrustUp = false;
+            var thrustLeft = false;
+            var thrustRight = false;
+            //game states
+            var resetPressed = false;
+            var gamePaused = true;
+            var dead = false;
+            var landed = false;
+
+
+
+            function init() {
+                ctx = document.getElementById('canvas').getContext('2d');
+                //50 px less than full screen
+                canvas.width = window.innerWidth - 50;
+                canvas.height = window.innerHeight - 50;
+                landerImg.src = "lander.png";
+                landerHeight = landerImg.height;
+                landerWidth = landerImg.width;
+                padImg.src = "LandingPad.png";
+                lpWidth = 100;
+                lpHeight = 61;
+                planet.src = "Earth.png";
+                logo.src = "logo.png";
+                WIDTH = canvas.width;
+                HEIGHT = canvas.height;
+                requestAnimationFrame(draw);
+                
+                //generate random ground
+                genGround();
+                makeStars();
+                //set the platform
+                resetPlatform();                
+                //reset the ship        
+                resetShip();
+                
+            }
+
+            function resetPlatform() {
+                
+                //place landing pad, ensuring its on the screen
+                lpX = Math.floor(((Math.random() * (WIDTH - lpWidth))));
+                
+                //get the height of the pad to match the height of the ground (more or less)
+                lpY = points[Math.floor((lpX + lpWidth/2)/4)] - lpHeight + 20;
+                
+            }
+
+            
+            function resetShip() {
+                x = Math.floor(((Math.random() * (WIDTH - shipWidth))));;
+                y = 50;
+                //POSITIVE IS DOWN SILLY
+                //speed
+                dx = 0;
+                dy = 0;
+                fuel = 8 + Math.floor((Math.abs(lpX - x))/50); //make this dependent on distance to platform
+                shipHeight = 20;
+            }
+
+            function circle(x, y, r) {
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2, true);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            function rect(x, y, w, h) {
+                ctx.beginPath();
+                ctx.rect(x, y, w, h);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            function line(x1, y1, x2, y2) {
+                
+                ctx.beginPath();
+                ctx.strokeStyle="green";
+                ctx.moveTo(x1,y1);
+                ctx.lineTo(x2,y2);
+                ctx.stroke();                
+                ctx.closePath();
+                
+            }
+
+            function clear() {
+                ctx.fillStyle = "#000000"; //black
+                rect(0, 0, WIDTH, HEIGHT);
+            }
+
+            //w = 87
+            //s = 83
+            //a = 65
+            //d = 68
+            //space = 32
+            function onKeyDown(evt) {
+                //up = w
+                if (evt.keyCode === 87) {
+                    thrustUp = true;
+                }
+                if (evt.keyCode === 83) { //down 
+                    //can't thrust down?
+                }
+                if (evt.keyCode === 65) { //left = a
+                    thrustLeft = true;
+                }
+                if (evt.keyCode === 68) { //right = d
+
+                    thrustRight = true;
+                }
+                if (evt.keyCode === 32) { //space = reset
+                    resetPressed = true;
+                    
+                }
+            }
+
+            function onKeyUp(evt) {
+                //up = w
+                if (evt.keyCode === 87) {
+                    thrustUp = false;
+                }
+                if (evt.keyCode === 83) { //down 
+                    //can't thrust down?
+                }
+                if (evt.keyCode === 65) { //left = a
+                    thrustLeft = false;
+                }
+                if (evt.keyCode === 68) { //right = d
+                    thrustRight = false;
+                }
+                if (evt.keyCode === 32) { //space = reset
+                    resetPressed = false;
+                }
+            }
+
+            function drawScoreBar() {
+                ctx.fillStyle = "#FFFFFF"; //white
+                ctx.font = "30px Courier";
+                //ctx.fillText("FUEL: " + fuel.toFixed(1) + " Y: " + y.toFixed(1) + " X: " + x.toFixed(1) + " DY: " + dy.toFixed(2) + " DX: " + dx.toFixed(2), 0, 30);
+                //warn about low fuel
+                if(fuel < 5){
+                    ctx.fillStyle = "#ff0000"; //red
+                }
+                ctx.fillText("FUEL: " + fuel.toFixed(1), 0, 30);
+            }
+   
+
+            function drawReset() {
+                ctx.fillStyle = "#FFFFFF"; //white
+                //draw text
+                ctx.font = "30px Courier";
+                ctx.drawImage(logo, WIDTH/2 - 150, 100);
+                ctx.fillText("Press space to fly!", WIDTH / 2 - 150, HEIGHT / 2);
+                //draw the ship
+                ctx.drawImage(landerImg, (WIDTH/2 - shipWidth), (HEIGHT/2 + 40));
+                ctx.fillStyle = "#FF4500"; //orange
+                rect(WIDTH/2 + shipWidth / 4, (HEIGHT/2 + 60) + shipHeight, 1, 10);
+                rect(WIDTH/2 + shipWidth / 4 - 2, (HEIGHT/2 + 60) + shipHeight, 1, 8);
+                rect(WIDTH/2 + shipWidth / 4 + 2, (HEIGHT/2 + 60) + shipHeight, 1, 8);
+            }
+
+            function drawGameOver() {
+                ctx.fillStyle = "#FFFFFF"; //white
+                //draw text
+                ctx.font = "30px Courier";
+                ctx.fillText("GAME OVER!", WIDTH / 2 - 80, HEIGHT / 2);
+                ctx.fillText("Press space to fly!", WIDTH / 2 - 150, HEIGHT / 2 + 30);
+            }
+
+            function drawWinMessage() {
+                ctx.fillStyle = "#FFFFFF"; //white
+                //draw text
+                ctx.font = "30px Courier";
+                ctx.fillText("YOU LANDED!", WIDTH / 2 - 80, HEIGHT / 2);
+                ctx.fillText("Press space to fly!", WIDTH / 2 - 150, HEIGHT / 2 + 30);
+            }
+
+            //generate a list of random points which will then be connected
+            //hopefully this looks like random ground 
+            function genGround() {
+                //start with an empty list
+                points = [];
+                //set ground level
+                groundLevel = HEIGHT - Math.floor(((Math.random() * 50) + 100));
+                var start = groundLevel; //always start at the same location (maybe randomize this later)
+               
+                var change = 0;
+                
+                //every 4 pixels for the whole width                    
+                for (var i = 0; i < WIDTH; i += 4) {
+                    //make a random value within 7 of the previous random value
+                    if(i % 4 === 0){ //change it every 4 times
+                        change = Math.floor((Math.random() * 7) - 3);
+                    }
+                    start += change;
+                    //add the random value to the list                    
+                    points.push(start);
+                                      
+                }   
+                
+               
+                
+            }
+            
+            function makeStars(){
+                //now make the stars
+                //start with an empty list
+                stars = [];
+                var starX, starY, rad;
+                //there are 100 stars
+                for (var i = 0; i < 300; i++) {
+                    //make random x y position and size
+                    starX = Math.floor((Math.random() * WIDTH));
+                    starY = Math.floor((Math.random() * HEIGHT));
+                    rad = Math.floor((Math.random() * 2) + 1);
+                    stars.push({x:starX, y:starY, r:rad});
+                }
+            }
+
+            function drawPlanet(){
+                ctx.drawImage(planet, WIDTH - 220, 50);
+            }
+            
+            function drawStars(){
+                var sLen = stars.length;            
+                
+                ctx.fillStyle = "#C0C0C0"; //silver stars
+                for (var i = 0; i < sLen; i++) {    
+                    //draw little circles
+                    circle(stars[i].x, stars[i].y, stars[i].r);
+                }
+                
+            }
+            function drawGround() {
+                ctx.fillStyle = "#C0C0C0"; //silver
+                ctx.strokeStyle="#C0C0C0";
+                
+                //at the bottom
+                
+                //draw lines from point to point
+                
+                var xVal = 0;                
+                var pLen = points.length;
+                
+                             
+               
+                ctx.beginPath();
+                //go to the leftmost starting point 
+                ctx.moveTo(xVal, points[0]);
+                //move from point to point
+                for(var i = 0; i < pLen - 1; i++){  
+                    xVal += 4;
+                    ctx.lineTo(xVal, [points[i]]);
+                    
+                }
+                //right edge
+                ctx.lineTo(WIDTH, points[pLen - 1]);
+                //bottom right corner
+                ctx.lineTo(WIDTH, HEIGHT);
+                //bottom left corner
+                ctx.lineTo(0, HEIGHT);
+                //finish the "shape"
+                ctx.closePath();
+                ctx.stroke(); 
+                //fill er in
+                ctx.fill();
+                
+
+            }
+
+            function drawLandingPad() {
+                ctx.drawImage(padImg, lpX, lpY);
+            }
+
+            function paused() {
+                //stop ship from moving
+                gamePaused = true;
+            }
+
+
+            function moveShip() {
+                //only move ship when there's fuel to do so
+                if (fuel > 0) {
+                    //check which direction(s) to add thrust (uses fuel)
+                    if (thrustUp) {
+                        fuel -= thrustPower;
+                        dy -= thrustPower;
+                    }
+                    if (thrustLeft) {
+                        fuel -= thrustPower;
+                        dx -= thrustPower / 4;
+                    }
+                    if (thrustRight) {
+                        fuel -= thrustPower;
+                        dx += thrustPower / 4;
+                    }
+                } else {
+                    //don't let fuel go negative
+                    fuel = 0;
+                }
+
+            }
+
+            function checkShipCollision() {
+                //see if we landed at the landing pad
+                if ((y + shipHeight - 3) >= lpY && x >= lpX && x <= lpX + lpWidth) {
+                    //also make sure we're not going too fast in either directions
+                    if (dx <= 0.1 && dx >= -0.1 && dy <= 0.2) {
+                        landed = true;
+                    } else { //we crashed into the pad
+                        dead = true;
+                    }
+
+                //see if we're landing off the pad   
+                //checkc lowest point in a part of the ground that the ship is above
+                }else if ((y + shipHeight) > highPoint(x, shipWidth)) {
+                    dead = true;
+                }
+                
+            }
+            
+            //given an x coordinate, return the lowest (since up is negative)
+            //point to either side of the given point
+            //we'll use this for colliding with the ground
+            //NOT ACTUALLY USING THIS FOR ANYTHING IMPORTANT BUT SPENT TOO MUCH TIME TO DELETE IT
+            function highPoint(a, dist){
+                var len = points.length;
+               
+                
+                //figure out how far on each side of point a we should look
+                //
+                //normalize a to our list of points (divided by 4 and rounded down)
+                var left = Math.floor(a/4);
+                if ((left + dist) >= len){
+                    dist = len - 1;
+                }
+                a = Math.floor(a/4);
+                var min = 10000;
+                //first look left
+                for(var i = left; i < dist; i ++){
+                    min = Math.min(points[i], min);
+                }
+               
+                
+                //this seems to work better
+                return points[Math.floor(a/4)];
+                //return min
+            }
+
+            function drawShip() {
+                
+                //draw thrust only if flying
+                if (fuel > 0 && !landed) {
+                    //check which direction(s) to draw thrust
+                    if (thrustUp) {                        
+                        ctx.fillStyle = "#FF4500"; //orange
+                        rect(x + shipWidth / 4, y + shipHeight, 1, 10);
+                        rect(x + shipWidth / 4 - 2, y + shipHeight, 1, 8);
+                        rect(x + shipWidth / 4 + 2, y + shipHeight, 1, 8);
+                    }
+                    if (thrustLeft) {
+                        ctx.fillStyle = "#FF4500"; //orange
+                        rect(x + shipWidth, y , 10, 1);
+                        rect(x + shipWidth , y   + 2, 8, 1);
+                        rect(x + shipWidth , y  - 2, 8, 1);
+                    }
+                    if (thrustRight) {
+                        ctx.fillStyle = "#FF4500"; //orange
+                        rect(x - shipWidth/4, y , -10, 1);
+                        rect(x - shipWidth/4 , y   + 2, -8, 1);
+                        rect(x - shipWidth/4, y  - 2, -8, 1);
+                    }
+                }
+                //display the actual image of the ship
+                ctx.drawImage(landerImg, (x - shipWidth), (y - shipHeight));
+                
+            }
+
+            function drawDeadShip() {
+                //makes an explosion like thingy
+                if (shipHeight >= 0) {
+                    ctx.fillStyle = "#FFFFFF"; //white               
+                    circle(x, y, shipHeight);
+                    shipHeight--;
+                }
+            }
+
+            //updates speed and location of ship
+            function updateShip() {
+                //add in gravity constant
+                dy += gravity;
+                //update the position of the ship
+                x += dx;
+                y += dy;
+            }
+
+            //sets everything up again for a new try
+            function reset(){
+                genGround();
+                makeStars();
+                resetPlatform();                        
+                resetShip();
+                dead = false;
+                landed = false;
+            }
+            
+            //draws the stars,planet, score board, landing pad and ground
+            function drawBackGround(){
+                drawStars();
+                drawPlanet();
+                drawScoreBar();
+                drawLandingPad();
+                drawGround();  
+            }
+
+            //main game loop
+            function draw() {
+                //start nice and fresh
+                clear();
+                //check which state the game is in...
+                if (gamePaused) { //main start screen
+                    drawStars();
+                    paused();
+                    drawReset();                    
+                    if (resetPressed) {
+                        gamePaused = false;
+                    }
+                } else if (dead) { //player has crashed
+                    drawBackGround();                 
+                    drawDeadShip();
+                    drawGameOver();
+                    if (resetPressed) {  
+                        reset();
+                    }
+                } else if (landed) { //player has successfully landed the ship
+                    drawBackGround();                     
+                    drawShip();
+                    drawWinMessage();
+                    if (resetPressed) {
+                        reset();
+                    }
+                } else { //player is flying around having a great time!
+                    drawBackGround();                   
+                    updateShip();
+                    moveShip();
+                    drawShip();
+                    checkShipCollision();
+                }
+                requestAnimationFrame(draw); //animate the canvas
+            }
+            //force the title
+            document.title = "Lunatic Lander";
+            //give the canvas focus
+            document.getElementById('canvas').focus();
+            //call the init function when the page loads
+            window.addEventListener("load", init, false);
+            //call the key press functions when keys are pressed
+            window.addEventListener("keydown", onKeyDown, false);
+            window.addEventListener("keyup", onKeyUp, false);
+        </script>
+
+    </body>
+</html>
