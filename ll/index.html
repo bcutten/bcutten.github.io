@@ -220,7 +220,7 @@ TO DO
                 //draw text
                 ctx.font = "30px Courier";
                 ctx.drawImage(logo, WIDTH/2 - 150, 100);
-                ctx.fillText("Press space to fly!", WIDTH / 2 - 150, HEIGHT / 2);
+                ctx.fillText("Press space to fly!", WIDTH / 2 - 150, HEIGHT - 100);
                 //draw the ship
                 ctx.drawImage(landerImg, (WIDTH/2 - shipWidth), (HEIGHT/2 + 40));
                 ctx.fillStyle = "#FF4500"; //orange
@@ -394,6 +394,7 @@ TO DO
             //we'll use this for colliding with the ground
             //NOT ACTUALLY USING THIS FOR ANYTHING IMPORTANT BUT SPENT TOO MUCH TIME TO DELETE IT
             function highPoint(a, dist){
+                /*
                 var len = points.length;
                
                 
@@ -411,7 +412,7 @@ TO DO
                     min = Math.min(points[i], min);
                 }
                
-                
+                */
                 //this seems to work better
                 return points[Math.floor(a/4)];
                 //return min
