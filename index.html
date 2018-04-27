@@ -6,334 +6,39 @@ and open the template in the editor.
 -->
 <html>
     <head>
-        <title>Ponk - The Game</title>
+        <title>JavaScript Examples</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            canvas {
-                padding-left: 0;
-                padding-right: 0;
-                margin-left: auto;
-                margin-right: auto;
-                display: block;
-                width: 800px;
-            }            
+            div {
+              background:grey;
+              position:absolute;
+              color:#fff;
+              top:50%;
+              left:50%;
+              padding:15px;
+              -ms-transform: translateX(-50%) translateY(-50%);
+              -webkit-transform: translate(-50%,-50%);
+              transform: translate(-50%,-50%);
+            } 
             
-            p {
-                text-align:center;
-                font-family:'Arial';
-                font-size: larger;
-                font-style: oblique;
-                font-weight: bold;
+            a {
+                
             }
         </style>
     </head>
+    
     <body>
         <div>
-            
+            <p>Welcome to bcutten's page of <b>JavaScript</b> programs</p>
+            <p>Check them out below!</p>
+          <ul>
+              <li><a href="https://bcutten.github.io/ponk/index.html">Ponk</a> -  released Oct 2016</li>
+              <li><a href="https://bcutten.github.io/ll/index.html">Lunatic Lander</a> - released April 2018</li>
+          </ul>  
             
         </div>
-
-        <canvas id="canvas" width="800" height="600" style= "border:1px white" tabindex="1"></canvas>
-
-
-        <script>
-            //var ctx = document.getElementById('canvas').getContext('2d');
-            //host on cutten.tk and google drive
-            //ball
-            var x = 150;
-            var y = 150;
-            var rad = 10;
-            var dx = -15;
-            var dy = 15;
-            //
-            var specialP1 = 0; //change in y speed if keyup/down is pressed
-            var specialP2 = 0; //change in y speed if keyup/down is pressed
-            //screen
-            var ctx;
-            var WIDTH;
-            var HEIGHT;
-            //paddle 1
-            var paddle1X;
-            var paddle1Y;
-            var paddle1H;
-            var paddle1W;
-            //paddle 2
-            var paddle2X;
-            var paddle2Y;
-            var paddle2H;
-            var paddle2W;
-            //key presses
-            var p1Up = false;
-            var p1Down = false;
-            var p2Up = false;
-            var p2Down = false;
-            var resetPressed = false;
-            var gamePaused = true;
-            //scores 
-            var p1Score;
-            var p2Score;
-            var scoredLast = "p1";
-
-            function init() {
-                ctx = document.getElementById('canvas').getContext('2d');
-                //attempt full screen
-                //ctx.canvas.width  = window.innerWidth;
-                //ctx.canvas.height = window.innerHeight;
-                WIDTH = ctx.canvas.width;
-                HEIGHT = ctx.canvas.height;
-                p1Score = 0;
-                p2Score = 0;
-                init_paddles();
-                requestAnimationFrame(draw);
-                //return setInterval(draw, 10);
-            }
-
-            function init_paddles() {
-                //set padddle 1 size on the left side of the screen
-                paddle1W = 10;
-                paddle1H = 100;
-                paddle1X = 0;
-                paddle1Y = HEIGHT / 2;
-                //set paddle 2 on the right side of the screen
-                paddle2W = 10;
-                paddle2H = 100;
-                paddle2X = WIDTH - paddle2W;
-                paddle2Y = HEIGHT / 2;
-            }
-
-            function circle(x, y, r) {
-                ctx.beginPath();
-                ctx.arc(x, y, r, 0, Math.PI * 2, true);
-                ctx.closePath();
-                ctx.fill();
-            }
-
-            function rect(x, y, w, h) {
-                ctx.beginPath();
-                ctx.rect(x, y, w, h);
-                ctx.closePath();
-                ctx.fill();
-            }
-
-            function clear() {
-                ctx.fillStyle = "#000000"; //black
-                rect(0, 0, WIDTH, HEIGHT);
-            }
-
-            //w = 87
-            //s = 83
-            //up arrow = 38
-            //down arrow = 40
-            //space = 32
-            function onKeyDown(evt) {
-                if (evt.keyCode === 87){
-                    p1Up = true;
-                    specialP1 = 0.5;
-                }else if (evt.keyCode === 83){
-                    p1Down = true;
-                    specialP1 = 0.5;
-                }
-                if (evt.keyCode === 38){
-                    p2Up = true;
-                    specialP2 = 0.5;
-                }else if (evt.keyCode === 40){
-                    p2Down = true;
-                    specialP2 = 0.5;
-                }
-                if (evt.keyCode === 32)
-                    resetPressed = true;
-            }
-
-            function onKeyUp(evt) {
-                if (evt.keyCode === 87){
-                    p1Up = false;
-                    specialP1 = 0;
-                }else if (evt.keyCode === 83){
-                    p1Down = false;
-                    specialP1 = 0;
-                }
-                if (evt.keyCode === 38){
-                    p2Up = false;
-                    specialP2 = 0;
-                }else if (evt.keyCode === 40){
-                    p2Down = false;
-                    specialP2 = 0;
-                }
-                if (evt.keyCode === 32)
-                    resetPressed = false;
-            }
-
-            function drawScore() {
-                ctx.fillStyle = "#FFFFFF"; //white
-                ctx.font = "30px Courier";
-                ctx.fillText("Score: P1 = " + p1Score + " P2 = " + p2Score, WIDTH / 2 - 180, 30);
-            }
-
-            function drawReset() {
-                ctx.fillStyle = "#FFFFFF"; //white
-                //draw text
-                ctx.font = "30px Courier";
-                ctx.fillText("Press space", WIDTH / 2 - 90, HEIGHT / 2 - 40);
-            }
-
-            function scored() {
-                //put ball in centre of screen
-                x = WIDTH / 2;
-                y = HEIGHT / 2;
-                //stop it from moving
-                dx = 0;
-                dy = 0;
-                gamePaused = true;
-            }
-
-            function startBall() {
-                //determine which way to throw the ball
-                if (scoredLast === "p1") {
-                    dx = -4;
-                } else {
-                    dx = 4;
-                }
-                //switch between starting the ball up and down
-                if ((p1Score + p2Score) % 2 === 1) {
-                    dy = -4;
-                } else {
-                    dy = 4;
-                }
-
-            }
-
-            function movePaddles() {
-                //move the paddles
-                //paddle 1
-                if (p1Up && paddle1Y > 0)
-                    paddle1Y -= 5;
-                else if (p1Down && (paddle1Y + paddle1H) < HEIGHT)
-                    paddle1Y += 5;
-                //paddle 2
-                if (p2Up && paddle2Y > 0)
-                    paddle2Y -= 5;
-                else if (p2Down && (paddle2Y + paddle2H) < HEIGHT)
-                    paddle2Y += 5;
-
-            }
-
-            function checkBallBounce() {
-                var crazyChance = Math.random(); //between 0 and 1
-                //check if the ball needs to bounce off the paddles
-                //first check paddle1
-                if ((x - rad + dx <= paddle1X + paddle1W) && (y > paddle1Y && y < paddle1Y + paddle1H)) {
-                    //change angle that ball bounces off of paddle at
-                    //top or bottom third of paddle
-                    //dy = dy + specialP1;
-                    
-                    if (y > paddle1Y && y < paddle1Y + (paddle1H / 3)) {
-                        dy = dy * 1.2;
-                    } else if (y < paddle1Y + paddle1H && y > paddle1Y - (paddle1H / 3)) {
-                        dy = dy * 1.2;
-                    } else {
-                        dy = dy * 0.9;
-                    }
-                    if (crazyChance < 0.2) {
-                        dy = -dy; //PONK!
-                    }
-                    //increase speed
-                    dx = -dx * 1.1;
-                }
-                //next check paddle2
-                if ((x + rad + dx >= paddle2X) && (y > paddle2Y && y < paddle2Y + paddle2H)) {
-                    //change angle that ball bounces off of paddle at
-                    //top or bottom third of paddle
-                    
-                    if (y > paddle2Y && y < paddle2Y + (paddle2H / 3)) {
-                        dy = dy * 1.2;
-                    } else if (y < paddle2Y + paddle2H && y > paddle2Y - (paddle2H / 3)) {
-                        dy = dy * 1.2;
-                    } else {
-                        dy = dy * 0.9;
-                    }
-                    
-                    //dy = dy + specialP2;
-                    if (crazyChance < 0.2) {
-                        dy = -dy; //PONK
-                    }
-                    dx = -dx * 1.1;
-                }
-
-                //check if the ball needs to bounce off the top walls                
-                if (y + dy + rad > HEIGHT || y + dy - rad < 0) {
-                    dy = dy * 0.9;
-                    dy = -dy;
-                }
-            }
-
-            function drawPaddles() {
-                ctx.fillStyle = "#FFFFFF"; //white
-                //draw paddle1
-                rect(paddle1X, paddle1Y, paddle1W, paddle1H);
-                //draw paddle2
-                rect(paddle2X, paddle2Y, paddle2W, paddle2H);
-
-            }
-
-            function checkScore() {
-                //check if the ball hit the left wall
-                //player 2 scored
-                if (x + dx - rad < 0) {
-                    scoredLast = "p2";
-                    p2Score++;
-                    scored();
-                }
-                //check if the ball hit the right wall
-                //player 1 scored
-                if (x + dx + rad > WIDTH) {
-                    scoredLast = "p1";
-                    p1Score++;
-                    scored();
-                }
-            }
-
-            function updateBall() {
-                //update the position of the ball
-                x += dx;
-                y += dy;
-                //draw ball
-                ctx.fillStyle = "#FFFFFF"; //white
-                circle(x, y, rad);
-            }
-
-            //main game loop
-            function draw() {
-                //start fresh
-                clear();
-                if (gamePaused) {
-                    scored();
-                    drawReset();
-                    if (resetPressed) {
-                        startBall();
-                        gamePaused = false;
-                    }
-                } else {
-                    updateBall();
-                    checkBallBounce();
-                    checkScore();
-                }
-
-                movePaddles();
-                drawPaddles();
-                drawScore();
-                requestAnimationFrame(draw);
-            }
-            //force the title
-            document.title = "Ponk - The Game"; 
-            //give the canvas focus
-            document.getElementById('canvas').focus();
-            //call the init function when the page loads
-            window.addEventListener("load", init, false);
-            //call the key press functions when keys are pressed
-            window.addEventListener("keydown", onKeyDown, false);
-            window.addEventListener("keyup", onKeyUp, false);
-        </script>
+        
 
     </body>
 
