@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Memory Mayhem: Java Edition Fixed</title>
+        <style>
+            /* Author: B Cutten + Google Gemini 3
+               Date: February 2026
+               Purpose: ICS3U Educational Game - Teaching Java Primitive Data Types 
+                        (memory sizes, literal suffixes, and value ranges).
+            */
+            body {
+                background: #1a1a2e;
+                color: #fff;
+                font-family: 'Courier New', Courier, monospace;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            #game-ui {
+                margin-top: 10px;
+                font-size: 20px;
+                display: flex;
+                gap: 30px;
+                background: rgba(0, 0, 0, 0.3);
+                padding: 10px 20px;
+                border-radius: 8px;
+            }
+            #game-canvas {
+                background: #16213e;
+                border: 4px solid #0f3460;
+                margin-top: 10px;
+                box-shadow: 0 0 20px rgba(0,255,255,0.2);
+                cursor: crosshair;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div id="game-ui">
+            <div>SCORE: <span id="score">0</span></div>
+            <div>HIGH SCORE: <span id="high-score">0</span></div> 
+            <div>LIVES: <span id="lives">3</span></div>
+            <div>LEVEL: <span id="level">1</span></div>
+        </div>
+
+        <canvas id="game-canvas" width="800" height="500"></canvas>
+
+        <script>
+            // --- GLOBAL CONSTANTS & DOM ELEMENTS ---
+            const canvas = document.getElementById('game-canvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('score');
+            const livesEl = document.getElementById('lives');
+            const levelEl = document.getElementById('level');
+            const highScoreEl = document.getElementById('high-score');
+
+            // --- GAME STATE ---
+            let score = 0;
+            let lives = 3;
+            let level = 1;
+            let fallingItems = [];
+            let particles = [];
+            let gameActive = false;
+            let isPaused = false;
+            let isStarting = true; 
+
+            // --- PERSISTENT DATA ---
+            // LocalStorage allows the record to stay saved after refreshing the page
+            let highScore = localStorage.getItem('memoryMayhemHighScore') || 0;
+            highScoreEl.innerText = highScore;
+
+            // --- DATA TYPE DEFINITIONS (The 8 Java Primitives) ---
+            const bins = [
+                {type: 'byte', size: 1, color: '#e94560', x: 0},
+                {type: 'short', size: 2, color: '#950740', x: 100},
+                {type: 'char', size: 2, color: '#c3073f', x: 200},
+                {type: 'int', size: 4, color: '#4e4e50', x: 300},
+                {type: 'float', size: 4, color: '#1a1a2e', x: 400},
+                {type: 'long', size: 8, color: '#0f3460', x: 500},
+                {type: 'double', size: 8, color: '#16213e', x: 600},
+                {type: 'boolean', size: 1, color: '#533483', x: 700}
+            ];
+
+            // Statistics object used for the final accuracy report
+            const stats = {
+                byte: {correct: 0, total: 0}, short: {correct: 0, total: 0},
+                char: {correct: 0, total: 0}, int: {correct: 0, total: 0},
+                float: {correct: 0, total: 0}, long: {correct: 0, total: 0},
+                double: {correct: 0, total: 0}, boolean: {correct: 0, total: 0}
+            };
+
+            const binWidth = 100;
+
+            // --- PARTICLE SYSTEM (Visual Feedback) ---
+            class Particle {
+                constructor(x, y, color, speedX, speedY) {
+                    this.x = x; this.y = y; this.color = color;
+                    this.speedX = speedX; this.speedY = speedY;
+                    this.alpha = 1; // Fades to 0 to simulate disappearing
+                }
+                update() {
+                    this.x += this.speedX; this.y += this.speedY;
+                    this.alpha -= 0.02; 
+                }
+                draw() {
+                    ctx.globalAlpha = this.alpha;
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(this.x, this.y, 4, 4);
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            function createExplosion(x, y, color, isSuccess) {
+                const count = isSuccess ? 10 : 30; // Errors produce more "shrapnel"
+                for (let i = 0; i < count; i++) {
+                    particles.push(new Particle(
+                        x, y, color,
+                        (Math.random() - 0.5) * (isSuccess ? 4 : 10),
+                        (Math.random() - 0.5) * (isSuccess ? 4 : 10)
+                    ));
+                }
+            }
+
+            // --- JAVA COMPILER LOGIC ---
+            /** * This function simulates how a Java compiler identifies a literal.
+             * It prioritizes specific syntax (suffixes/quotes) before checking numeric ranges.
+             */
+            function getBestType(val) {
+                const str = val.toString();
+
+                if (str === "true" || str === "false") return 'boolean';
+                if (str.startsWith("'")) return 'char';
+                if (str.endsWith('f')) return 'float';
+                if (str.endsWith('L')) return 'long';
+                if (str.includes('.')) return 'double';
+
+                const n = parseInt(str);
+                if (n >= -128 && n <= 127) return 'byte';
+                if (n >= -32768 && n <= 32767) return 'short';
+                if (n >= -2147483648 && n <= 2147483647) return 'int';
+
+                return 'long';
+            }
+
+            /** * Randomly generates either a specific value (e.g. 5.5f)
+             * or a generic size requirement (e.g. 4 BYTES).
+             */
+            function createFallingItem() {
+                const types = ['byte', 'short', 'char', 'int', 'float', 'long', 'double', 'boolean'];
+                const selectedType = types[Math.floor(Math.random() * types.length)];
+                const isGeneric = Math.random() > 0.5;
+
+                let displayVal;
+                const typeReference = bins.find(b => b.type === selectedType);
+                const targetSize = typeReference.size;
+
+                if (isGeneric) {
+                    displayVal = targetSize + (targetSize === 1 ? " BYTE" : " BYTES");
+                } else {
+                    // Logic to create random data based on the chosen type
+                    switch (selectedType) {
+                        case 'byte': displayVal = Math.floor(Math.random() * 256) - 128; break;
+                        case 'short': displayVal = (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 32000) + 129); break;
+                        case 'int': displayVal = (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 2000000000) + 33000); break;
+                        case 'long': displayVal = Math.floor(Math.random() * 9000000) + "L"; break;
+                        case 'float': displayVal = (Math.random() * 100).toFixed(2) + "f"; break;
+                        case 'double': displayVal = (Math.random() * 1000).toFixed(4); break;
+                        case 'char': displayVal = "'" + "ABC#!".charAt(Math.floor(Math.random() * 5)) + "'"; break;
+                        case 'boolean': displayVal = Math.random() > 0.5 ? "true" : "false"; break;
+                    }
+                }
+
+                // horizontalBuffer ensures text doesn't spawn half-hidden off screen
+                const horizontalBuffer = 80;
+                const safeX = horizontalBuffer + Math.random() * (canvas.width - horizontalBuffer * 2);
+
+                fallingItems.push({
+                    value: displayVal,
+                    size: targetSize,
+                    actualType: selectedType,
+                    isGeneric: isGeneric,
+                    x: safeX,
+                    y: -30,
+                    speed: 1 + (level * 0.3) // Speed increases as level increases
+                });
+            }
+
+            // --- MAIN GAME LOOP ---
+            function update() {
+                if (!gameActive || isPaused) {
+                    if (isPaused) {
+                        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        ctx.fillStyle = "yellow"; ctx.font = "40px Courier New"; ctx.textAlign = "center";
+                        ctx.fillText("SYSTEM PAUSED", canvas.width / 2, canvas.height / 2);
+                    }
+                    return;
+                }
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Update particles
+                particles.forEach((p, index) => {
+                    p.update(); p.draw();
+                    if (p.alpha <= 0) particles.splice(index, 1);
+                });
+
+                // Draw Memory Bins
+                bins.forEach(bin => {
+                    ctx.fillStyle = bin.color;
+                    ctx.fillRect(bin.x, canvas.height - 60, binWidth, 60);
+                    ctx.fillStyle = "white"; ctx.font = "bold 16px Courier New"; ctx.textAlign = "center";
+                    ctx.fillText(bin.type, bin.x + binWidth / 2, canvas.height - 25);
+                });
+
+                // Draw the Yellow Target Box (Indicates current item to sort)
+                if (fallingItems.length > 0) {
+                    const target = fallingItems[0];
+                    ctx.font = "bold 20px Courier New";
+                    const boxWidth = ctx.measureText(target.value).width + 20;
+                    ctx.strokeStyle = "yellow"; ctx.lineWidth = 3;
+                    ctx.strokeRect(target.x - (boxWidth / 2), target.y - 25, boxWidth, 35);
+                }
+
+                // Update Falling Data
+                for (let i = fallingItems.length - 1; i >= 0; i--) {
+                    let item = fallingItems[i];
+                    item.y += item.speed;
+
+                    ctx.fillStyle = "#00fbff";
+                    ctx.font = "bold 20px Courier New";
+                    ctx.textAlign = "center";
+                    ctx.fillText(item.value, item.x, item.y);
+
+                    // Floor Collision (Item Missed)
+                    if (item.y > canvas.height - 60) {
+                        const missedType = item.actualType;
+                        fallingItems.splice(i, 1);
+                        loseLife(missedType);
+                    }
+                }
+
+                requestAnimationFrame(update);
+            }
+
+            // --- INPUT HANDLING ---
+            canvas.addEventListener('mousedown', (e) => {
+                if (!gameActive || fallingItems.length === 0) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // Only detect clicks if they occur in the bin area
+                if (mouseY > canvas.height - 100) {
+                    const binIndex = Math.floor(mouseX / binWidth);
+                    const selectedBin = bins[binIndex];
+                    const item = fallingItems[0];
+
+                    let isCorrect = item.isGeneric 
+                        ? (selectedBin.size === item.size) 
+                        : (selectedBin.type === getBestType(item.value));
+
+                    if (isCorrect) {
+                        score += 10;
+                        stats[item.actualType].correct++;
+                        createExplosion(item.x, item.y, "#00ff00", true); // Green for success
+                        if (score % 100 === 0) level++;
+                        
+                        if (score > highScore) {
+                            highScore = score;
+                            localStorage.setItem('memoryMayhemHighScore', highScore);
+                            highScoreEl.innerText = highScore;
+                        }
+                    } else {
+                        createExplosion(item.x, item.y, "red", false); // Red for error
+                        loseLife(item.actualType);
+                    }
+
+                    stats[item.actualType].total++;
+                    fallingItems.shift();
+                    scoreEl.innerText = score; levelEl.innerText = level;
+                }
+            });
+
+            window.addEventListener('keydown', (e) => {
+                // Pause Logic
+                if (e.code === "Space" || e.key.toLowerCase() === "p") {
+                    if (gameActive) {
+                        isPaused = !isPaused;
+                        if (!isPaused) update(); 
+                    }
+                }
+                // High Score Reset Logic (The "R" Key)
+                if (e.key.toLowerCase() === 'r') {
+                    localStorage.removeItem('memoryMayhemHighScore');
+                    highScore = 0;
+                    highScoreEl.innerText = highScore;
+                    // Visual confirmation: White flash
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+            });
+
+            // --- GAME OVER & UI SCREENS ---
+            function loseLife(itemType) {
+                if (itemType && stats[itemType]) stats[itemType].total++;
+                lives--;
+                livesEl.innerText = lives;
+
+                // Screen Shake feedback
+                canvas.style.transform = "translate(5px, 5px)";
+                setTimeout(() => canvas.style.transform = "translate(0, 0)", 100);
+
+                if (lives <= 0) {
+                    gameActive = false;
+                    drawGameOver();
+                }
+            }
+
+            function drawStartScreen() {
+                ctx.fillStyle = "#1a1a2e"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.textAlign = "center"; ctx.fillStyle = "#00fbff"; ctx.font = "45px 'Courier New'";
+                ctx.fillText("MEMORY MAYHEM", canvas.width / 2, canvas.height / 2 - 80);
+                ctx.font = "20px 'Courier New'";
+                ctx.fillText("JAVA PRIMITIVES EDITION", canvas.width / 2, canvas.height / 2 - 40);
+
+                ctx.fillStyle = "white"; ctx.font = "16px 'Courier New'";
+                ctx.fillText("Sort falling data into the correct memory bins.", canvas.width / 2, canvas.height / 2 + 20);
+                ctx.fillText("Match types based on suffixes (f, L), quotes (''), and size limits.", canvas.width / 2, canvas.height / 2 + 45);
+                ctx.fillText("Space to pause | R to reset high score", canvas.width / 2, canvas.height / 2 + 70);
+
+                ctx.fillStyle = "yellow"; ctx.font = "bold 22px 'Courier New'";
+                ctx.fillText("CLICK ANYWHERE TO INITIALIZE SYSTEM", canvas.width / 2, canvas.height / 2 + 120);
+
+                canvas.onclick = () => {
+                    isStarting = false; gameActive = true;
+                    canvas.onclick = null; update();
+                };
+            }
+
+            function drawGameOver() {
+                ctx.fillStyle = "rgba(10, 10, 25, 0.95)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.textAlign = "center"; ctx.fillStyle = "#ff0055"; ctx.font = "40px Courier New";
+                ctx.fillText("MEMORY DUMP COMPLETE", canvas.width / 2, 80);
+
+                // Calculate accuracy for the "Developer Rank"
+                let totalCorrect = 0; let totalAttempts = 0;
+                Object.keys(stats).forEach(type => {
+                    totalCorrect += stats[type].correct;
+                    totalAttempts += stats[type].total;
+                });
+                const overallPercent = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+
+                let rank = "DEBUGGING TRAINEE", rankColor = "#ff0055";
+                if (overallPercent >= 95) { rank = "SENIOR ARCHITECT"; rankColor = "#00fbff"; }
+                else if (overallPercent >= 85) { rank = "SYSTEMS ANALYST"; rankColor = "#00fbff"; }
+                else if (overallPercent >= 70) { rank = "JAVA DEVELOPER"; rankColor = "yellow"; }
+                else if (overallPercent >= 50) { rank = "JUNIOR CODER"; rankColor = "yellow"; }
+
+                ctx.fillStyle = "#888"; ctx.font = "18px Courier New";
+                ctx.fillText("ASSIGNED RANK:", canvas.width / 2, 130);
+                ctx.fillStyle = rankColor; ctx.font = "bold 32px Courier New";
+                ctx.fillText(rank, canvas.width / 2, 170);
+
+                ctx.fillStyle = "white"; ctx.font = "20px Courier New";
+                ctx.fillText("SYSTEM ACCURACY", canvas.width / 2, 230);
+                ctx.fillStyle = rankColor; ctx.font = "bold 60px Courier New";
+                ctx.fillText(`${overallPercent}%`, canvas.width / 2, 300);
+
+                // Delay the reboot prompt to prevent accidental clicks
+                setTimeout(() => {
+                    if (score >= highScore && score > 0) {
+                        ctx.fillStyle = "#00fbff"; ctx.font = "bold 22px Courier New";
+                        ctx.fillText("NEW SYSTEM RECORD SET!", canvas.width / 2, 330);
+                    }
+                    ctx.fillStyle = "white"; ctx.font = "18px Courier New";
+                    ctx.fillText(`TOTAL SCORE: ${score} | BEST: ${highScore}`, canvas.width / 2, 360);
+                    ctx.fillStyle = "#00fbff"; ctx.font = "bold 20px Courier New";
+                    ctx.fillText("CLICK TO REBOOT SYSTEM", canvas.width / 2, 420);
+                    canvas.onclick = () => location.reload();
+                }, 1000);
+            }
+
+            // Spawn loop: Adds a new item every 2 seconds if the game is running
+            setInterval(() => {
+                if (gameActive && !isPaused && !isStarting) createFallingItem();
+            }, 2000);
+
+            // Initial program entry point
+            if (isStarting) drawStartScreen();
+
+        </script>
+    </body>
+</html>
