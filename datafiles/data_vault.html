@@ -1,0 +1,2691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data File Vault // ICS3U Test Prep</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono with graceful system fallbacks -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          colors: {
+            paper: {
+              bg: '#f4f3ef',
+              card: '#fcfbf8',
+              subtle: '#f0eee8',
+              border: '#dcd8ce',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Warm academic paper-white backdrop paired with dark NetBeans cyber-lab IDE blocks */
+    body {
+      background-color: #f2f1ec;
+      background-image:
+        radial-gradient(circle at 12% 8%, rgba(79, 70, 229, 0.045) 0%, transparent 38%),
+        radial-gradient(circle at 88% 92%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+      color: #1e293b;
+      min-height: 100vh;
+    }
+
+    /* Crisp paper card elevation */
+    .paper-card {
+      background-color: #fcfbf8;
+      border: 1px solid #dcd8ce;
+      box-shadow: 0 4px 16px -4px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+
+    /* Custom sleek scrollbars */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #e7e5de;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #b8b3a6;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #948f82;
+    }
+
+    /* Java & Data File Syntax Highlighting */
+    .tok-kw { color: #c084fc; font-weight: 600; }
+    .tok-type { color: #38bdf8; font-weight: 500; }
+    .tok-method { color: #60a5fa; }
+    .tok-str { color: #34d399; }
+    .tok-num { color: #fbbf24; }
+    .tok-comment { color: #64748b; font-style: italic; }
+
+    /* Glowing scanner file pointer pulse */
+    @keyframes pointerPulse {
+      0%, 100% { box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.45), 0 0 14px rgba(16, 185, 129, 0.25); }
+      50% { box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.85), 0 0 22px rgba(16, 185, 129, 0.45); }
+    }
+    .scanner-pointer-glow {
+      animation: pointerPulse 2s infinite ease-in-out;
+    }
+
+    /* Calculator tactile buttons */
+    .calc-btn {
+      transition: transform 0.06s ease, background-color 0.12s ease;
+      user-select: none;
+    }
+    .calc-btn:active {
+      transform: scale(0.95);
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #ffffff !important; }
+    }
+  </style>
+</head>
+<body class="font-sans antialiased selection:bg-indigo-500/20 selection:text-indigo-950">
+
+  <!-- ==================== TOP NAVIGATION BAR (SLATE-900) ==================== -->
+  <header class="sticky top-0 z-30 bg-slate-900 text-slate-100 border-b border-slate-800 shadow-lg no-print">
+    <div class="max-w-[1480px] mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand & Test Readiness Progress -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/25 to-emerald-500/25 border border-indigo-400/40 flex items-center justify-center shadow-inner shrink-0">
+          <svg class="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="8" y1="13" x2="16" y2="13"></line>
+            <line x1="8" y1="17" x2="13" y2="17"></line>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-white">
+              Data File Vault <span class="text-emerald-400 font-mono">//</span> <span class="text-indigo-300">ICS3U Test Prep</span>
+            </h1>
+          </div>
+          <!-- Overall Test Readiness Bar -->
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-[11px] font-mono text-slate-400">Test Readiness:</span>
+            <div class="w-28 sm:w-36 h-2 rounded-full bg-slate-800 overflow-hidden border border-slate-700/80">
+              <div id="readiness-bar" class="h-full bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400 transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <span id="readiness-pct" class="text-[11px] font-mono font-bold text-emerald-400">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mission Selector Tabs (Missions 1 through 5) -->
+      <nav id="mission-nav" aria-label="Mission Selector" class="flex items-center gap-1.5 overflow-x-auto max-w-full py-1 order-3 xl:order-2 w-full xl:w-auto justify-start xl:justify-center">
+        <!-- Populated dynamically by JS -->
+      </nav>
+
+      <!-- Utility Buttons: 4-Function Calculator & Test Blueprint Cheat Sheet -->
+      <div class="flex items-center gap-2 order-2 xl:order-3">
+        <!-- 4-Function Calculator Toggle -->
+        <button id="toggle-calc-btn" type="button"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-amber-500/40 text-amber-300 text-xs font-semibold transition-all shadow-sm">
+          <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+            <line x1="8" y1="6" x2="16" y2="6"></line>
+            <line x1="8" y1="10" x2="8" y2="10.01"></line>
+            <line x1="12" y1="10" x2="12" y2="10.01"></line>
+            <line x1="16" y1="10" x2="16" y2="10.01"></line>
+            <line x1="8" y1="14" x2="8" y2="14.01"></line>
+            <line x1="12" y1="14" x2="12" y2="14.01"></line>
+            <line x1="16" y1="14" x2="16" y2="14.01"></line>
+            <line x1="8" y1="18" x2="12" y2="18"></line>
+            <line x1="16" y1="18" x2="16" y2="18.01"></line>
+          </svg>
+          <span>4-Function Calc</span>
+        </button>
+
+        <!-- Test Blueprint & Cheat Sheet Modal Trigger -->
+        <button id="open-cheatsheet-btn" type="button"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/50 text-white text-xs font-semibold transition-all shadow-sm">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+          <span class="hidden sm:inline">Test Blueprint &amp; Cheat Sheet</span>
+          <span class="sm:hidden">Cheat Sheet</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE CONTAINER ==================== -->
+  <main class="max-w-[1480px] mx-auto px-3 sm:px-6 py-5 space-y-5">
+
+    <!-- Test-Ready Banner (Appears when all 5 missions are complete) -->
+    <div id="test-ready-banner" class="hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-4 sm:p-5 border border-emerald-400/50 shadow-xl flex flex-wrap items-center justify-between gap-4 no-print">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-2xl shrink-0">
+          🎓
+        </div>
+        <div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+            100% Test Readiness Achieved
+          </span>
+          <h2 class="text-lg sm:text-xl font-extrabold text-white mt-0.5">
+            All 5 ICS3U Test Prep Missions Mastered!
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300">
+            You’ve mastered Data File theory, NetBeans Scanner loops, common Java traps, and no-calculator Binary/Hex conversions.
+          </p>
+        </div>
+      </div>
+      <button id="open-certificate-btn" type="button"
+        class="px-5 py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-extrabold text-sm shadow-lg transition-all">
+        View Test-Ready Certificate →
+      </button>
+    </div>
+
+    <!-- Active Mission Header Card -->
+    <section class="paper-card rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 no-print">
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="mission-badge" class="px-2.5 py-0.5 rounded-md text-xs font-mono font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+            MISSION 1 OF 5
+          </span>
+          <span id="mission-test-weight" class="px-2.5 py-0.5 rounded-md text-xs font-mono font-semibold bg-amber-100 text-amber-900 border border-amber-200">
+            Test Part 1: Q2 &amp; Q3 (9 Knowledge Marks)
+          </span>
+        </div>
+        <h2 id="mission-heading" class="text-lg sm:text-2xl font-extrabold text-slate-900 mt-1">
+          File, Record &amp; Field Anatomy
+        </h2>
+        <p id="mission-subtext" class="text-xs sm:text-sm text-slate-600 mt-0.5">
+          Inspect multi-line ICS3U text files, highlight specific records and fields, and verify exact structural counts.
+        </p>
+      </div>
+
+      <!-- Mission Status Pill -->
+      <div id="mission-status-box" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-mono font-semibold text-slate-700">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+        <span>In Progress</span>
+      </div>
+    </section>
+
+    <!-- Dynamic Mission Content Container -->
+    <div id="mission-workspace" class="no-print">
+      <!-- Rendered dynamically based on active mission (1–5) -->
+    </div>
+  </main>
+
+  <!-- ==================== FLOATING DRAGGABLE 4-FUNCTION CALCULATOR ==================== -->
+  <aside id="four-func-calc" aria-label="4-Function Calculator"
+    class="hidden fixed bottom-5 right-5 z-40 w-64 rounded-2xl bg-slate-900 text-white border border-slate-700 shadow-2xl overflow-hidden no-print">
+    <!-- Draggable Title Bar -->
+    <div id="calc-drag-handle" class="px-3.5 py-2 bg-slate-800 border-b border-slate-700 flex items-center justify-between cursor-move select-none">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+        <span class="font-mono text-xs font-bold text-slate-200">4-FUNCTION CALC</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <button id="calc-collapse-btn" type="button" title="Collapse/Expand"
+          class="px-1.5 py-0.5 rounded hover:bg-slate-700 text-slate-300 font-mono text-xs">
+          _
+        </button>
+        <button id="calc-close-btn" type="button" title="Close Calculator"
+          class="px-1.5 py-0.5 rounded hover:bg-rose-600 text-slate-300 hover:text-white font-mono text-xs">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Calculator Body -->
+    <div id="calc-body" class="p-3 space-y-2.5">
+      <div class="text-[10px] font-mono text-amber-300/90 bg-amber-500/10 border border-amber-500/20 rounded-lg px-2 py-1 text-center">
+        Test Rule: +, −, ×, ÷ only (No Scientific)
+      </div>
+
+      <!-- Readout Screen -->
+      <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-right font-mono">
+        <div id="calc-history" class="text-[11px] text-slate-400 h-4 truncate"></div>
+        <div id="calc-display" class="text-xl font-bold text-emerald-400 truncate">0</div>
+      </div>
+
+      <!-- Keypad Grid -->
+      <div class="grid grid-cols-4 gap-1.5 font-mono text-sm font-bold">
+        <button type="button" data-calc="C" class="calc-btn col-span-2 py-2 rounded-lg bg-rose-600/85 hover:bg-rose-500 text-white">AC</button>
+        <button type="button" data-calc="DEL" class="calc-btn py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200">⌫</button>
+        <button type="button" data-calc="/" class="calc-btn py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white">÷</button>
+
+        <button type="button" data-calc="7" class="calc-btn py-2 rounded-lg bg-slate-800 hover:bg-slate-700">7</button>
+        <button type="button" data-calc="8" class="calc-btn py-2 rounded-lg bg-slate-800 hover:bg-slate-700">8</button>
+        <button type="button" data-calc="9" class="calc-btn py-2 rounded-lg bg-slate-800 hover:bg-slate-700">9</button>
+        <button type="button" data-calc="*" class="calc-btn py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white">×</button>
+
+        <button type="button" data-calc="4" class="calc-btn py-2 rounded-lg bg-slate-800 hover:bg-slate-700">4</button>
+        <button type="button" data-calc="5" class="calc-btn py-2 rounded-lg bg-slate-800 hover:bg-slate-700">5</button>
+        <button type="button" data-calc="6" class="calc-btn py-2 rounded-lg bg-slate-800 hover:bg-slate-700">6</button>
+        <button type="button" data-calc="-" class="calc-btn py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white">−</button>
+
+        <button type="button" data-calc="1" class="calc-btn py-2 rounded-lg bg-slate-800 hover:bg-slate-700">1</button>
+        <button type="button" data-calc="2" class="calc-btn py-2 rounded-lg bg-slate-800 hover:bg-slate-700">2</button>
+        <button type="button" data-calc="3" class="calc-btn py-2 rounded-lg bg-slate-800 hover:bg-slate-700">3</button>
+        <button type="button" data-calc="+" class="calc-btn py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white">+</button>
+
+        <button type="button" data-calc="0" class="calc-btn col-span-2 py-2 rounded-lg bg-slate-800 hover:bg-slate-700">0</button>
+        <button type="button" data-calc="." class="calc-btn py-2 rounded-lg bg-slate-800 hover:bg-slate-700">.</button>
+        <button type="button" data-calc="=" class="calc-btn py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold">=</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== ICS3U TEST BLUEPRINT & CHEAT SHEET MODAL ==================== -->
+  <div id="cheatsheet-modal" role="dialog" aria-modal="true" aria-labelledby="cheatsheet-title"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-sm no-print">
+    <div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#fcfbf8] border border-slate-300 shadow-2xl text-slate-800">
+      <div class="sticky top-0 z-10 px-5 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+            ICS3U STUDY GUIDE
+          </span>
+          <h2 id="cheatsheet-title" class="text-base sm:text-lg font-extrabold">
+            Data Files &amp; Number Systems Test Blueprint
+          </h2>
+        </div>
+        <button id="close-cheatsheet-btn" type="button" aria-label="Close Cheat Sheet"
+          class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-5 sm:p-6 space-y-5 text-sm">
+        <!-- Test Structure Overview -->
+        <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-200">
+          <h3 class="font-bold text-indigo-950 mb-1.5">📋 Official ICS3U Test Breakdown</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm text-indigo-900">
+            <div><strong>Part 1 (Written):</strong></div>
+            <div><strong>Part 2 (Computer):</strong></div>
+            <div>• Q1: Evaluating conditions (11 App)</div>
+            <div>• Practical NetBeans Data File program (12 Thinking)</div>
+            <div>• Q2 &amp; Q3: Data File Theory &amp; Java commands (9 Know)</div>
+            <div>• Calculator Rule: <strong>4-Function (+, −, ×, ÷) ONLY</strong></div>
+            <div>• Q4 &amp; Q5: Hexadecimal &amp; Binary to Decimal (4 Know)</div>
+          </div>
+        </div>
+
+        <!-- Definitions: File, Record, Field -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm">
+            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-indigo-100 text-indigo-800">FILE</span>
+            <p class="mt-2 text-slate-700 leading-relaxed">
+              A collection of related records treated as a unit and stored under the same file name (e.g., <code class="font-mono text-xs bg-slate-100 px-1 rounded">STUDENTS.txt</code>).
+            </p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm">
+            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-100 text-emerald-800">RECORD</span>
+            <p class="mt-2 text-slate-700 leading-relaxed">
+              A complete entry about <strong>one topic or one person</strong> within a file (spans multiple consecutive lines in ICS3U files).
+            </p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm">
+            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-100 text-amber-800">FIELD</span>
+            <p class="mt-2 text-slate-700 leading-relaxed">
+              An area within a record which contains <strong>one specific type of information</strong> (e.g., Name, Age, Grade, Homeroom — each on its own line).
+            </p>
+          </div>
+        </div>
+
+        <!-- NetBeans Java File Reading Template -->
+        <div class="rounded-xl bg-slate-900 text-slate-100 p-4 font-mono text-xs sm:text-sm overflow-x-auto">
+          <div class="text-emerald-400 font-bold mb-2">// Standard ICS3U NetBeans File Reading Pattern</div>
+          <pre class="leading-relaxed">try {
+    // Relative path inside project's src folder (never C:\Users\...!)
+    File file = new File("src/packagename/data.txt"); // or "src\\packagename\\data.txt"
+    Scanner scanner = new Scanner(file);
+
+    while (scanner.hasNextLine()) {
+        String name = scanner.nextLine();               // Read String field
+        int age = Integer.parseInt(scanner.nextLine()); // Read &amp; parse int field
+        double pay = Double.parseDouble(scanner.nextLine()); // Parse double field
+    }
+} catch (FileNotFoundException e) {
+    System.out.println("Error: " + e);
+}</pre>
+        </div>
+
+        <!-- Pitfalls & Number Systems Place Values -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-xl bg-amber-50 border border-amber-200">
+            <h4 class="font-bold text-amber-950 mb-1">⚠️ Common ICS3U Pitfalls</h4>
+            <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm text-amber-900">
+              <li><strong>Integer Division:</strong> <code class="font-mono">double x = 1 / 2;</code> stores <code class="font-mono">0.0</code>! Cast first: <code class="font-mono">(double) 1 / 2</code>.</li>
+              <li><strong>Absolute Paths:</strong> <code class="font-mono">"C:\\Users\\..."</code> fails on your teacher's computer. Always start with <code class="font-mono">"src/..."</code>.</li>
+              <li><strong>Search Overwrite:</strong> Set <code class="font-mono">status = "Not Found"</code> <em>before</em> the loop; never reset it in an <code class="font-mono">else</code> inside the loop!</li>
+            </ul>
+          </div>
+
+          <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 font-mono text-xs">
+            <h4 class="font-sans font-bold text-emerald-950 text-sm mb-1.5">🔢 Binary &amp; Hex Place Values</h4>
+            <div class="mb-2">
+              <div class="font-bold text-emerald-900">8-Bit Binary Columns:</div>
+              <div class="bg-white p-1.5 rounded border border-emerald-200 mt-1 text-center">
+                128 | 64 | 32 | 16 | 8 | 4 | 2 | 1
+              </div>
+            </div>
+            <div>
+              <div class="font-bold text-emerald-900">Hexadecimal Digits &amp; Columns:</div>
+              <div class="bg-white p-1.5 rounded border border-emerald-200 mt-1">
+                A=10, B=11, C=12, D=13, E=14, F=15<br/>
+                Columns (Right-to-Left): ×1, ×16, ×256, ×4096
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TEST READY CERTIFICATE MODAL ==================== -->
+  <div id="certificate-modal" role="dialog" aria-modal="true"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-sm">
+    <div class="w-full max-w-2xl rounded-2xl bg-[#fcfbf8] border-4 border-slate-900 p-6 sm:p-8 shadow-2xl text-slate-900 relative">
+      <button id="close-cert-btn" type="button"
+        class="absolute top-4 right-4 px-2.5 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-mono text-xs font-bold no-print">
+        ✕ Close
+      </button>
+
+      <div class="text-center border-b-2 border-slate-200 pb-5">
+        <div class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 font-mono text-xs font-bold uppercase tracking-wider mb-2">
+          ICS3U Computer Science · Certification
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          Data File Vault Clearance
+        </h2>
+        <p class="text-sm text-slate-600 mt-1">
+          Official Readiness Summary for the Java Data Files &amp; Number Systems Test
+        </p>
+      </div>
+
+      <div class="py-5 space-y-3 text-sm">
+        <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+          <span class="font-semibold text-emerald-950">1. File, Record &amp; Field Structure</span>
+          <span class="font-mono font-bold text-emerald-700">✓ MASTERED</span>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+          <span class="font-semibold text-emerald-950">2. NetBeans Paths, File &amp; Scanner Syntax</span>
+          <span class="font-mono font-bold text-emerald-700">✓ MASTERED</span>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+          <span class="font-semibold text-emerald-950">3. Scanner Line Pointer &amp; Loop Tracing</span>
+          <span class="font-mono font-bold text-emerald-700">✓ MASTERED</span>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+          <span class="font-semibold text-emerald-950">4. Integer Division, Search &amp; Parse Debugging</span>
+          <span class="font-mono font-bold text-emerald-700">✓ MASTERED</span>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+          <span class="font-semibold text-emerald-950">5. 4-Function Binary &amp; Hexadecimal Conversion</span>
+          <span class="font-mono font-bold text-emerald-700">✓ MASTERED</span>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="font-mono text-xs text-slate-500">
+          Readiness Score: <strong class="text-slate-900">100%</strong> · Approved for Test Day
+        </div>
+        <button id="print-cert-btn" type="button"
+          class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors no-print">
+          🖨 Print / Save Summary
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GAME DATA & APPLICATION LOGIC ==================== -->
+  <script>
+    /**
+     * Global State for Data File Vault: ICS3U Test Prep
+     */
+    const appState = {
+      activeMission: 1,
+      completedMissions: new Set(),
+
+      // Mission 1: File, Record & Field Anatomy
+      m1: {
+        defsMatched: false,
+        defAnswers: { file: '', record: '', field: '' },
+        challengeIdx: 0, // 0: TV Shows, 1: Students, 2: NHL Stats
+        step: 'CLICK_RECORD', // 'CLICK_RECORD' -> 'CLICK_FIELD' -> 'COUNTS' -> 'DONE'
+        selectedLines: new Set(),
+        countsSolved: [false, false, false],
+        clickSolved: [false, false, false]
+      },
+
+      // Mission 2: NetBeans File & Scanner Command Builder
+      m2: {
+        subTab: 'PATHS', // 'PATHS' | 'COMMANDS'
+        pathSolved: [false, false],
+        pathSelected: [null, null],
+        commandsSolved: false,
+        cmdAnswers: {
+          a: '',
+          b: '',
+          c: '',
+          d1: '',
+          d2: '',
+          e: '',
+          f: ''
+        }
+      },
+
+      // Mission 3: Visual Scanner Cursor & Loop Trace
+      m3: {
+        caseIdx: 0, // 0: DataFileScannerExample, 1: NHL Plus/Minus, 2: Credit Card Accounts
+        predicted: [false, false, false],
+        selectedPred: [null, null, null],
+        stepIdx: [0, 0, 0],
+        tracedComplete: [false, false, false]
+      },
+
+      // Mission 4: ICS3U Bug Hunter
+      m4: {
+        bugIdx: 0, // 0: Integer Division, 1: Not Found Overwrite, 2: Misaligned nextLine()
+        bugRunTriggered: [false, false, false],
+        fixedSelected: [null, null, null],
+        bugsSolved: [false, false, false]
+      },
+
+      // Mission 5: No-Calculator Number Systems Lab
+      m5: {
+        mode: 'BINARY', // 'BINARY' | 'HEX'
+        // Binary state
+        binIdx: 0,
+        sandboxBits: [0, 0, 0, 0, 0, 0, 0, 0],
+        binSolved: [false, false, false, false],
+        customBin: null,
+        // Hex state
+        hexIdx: 0,
+        hexSolved: [false, false, false, false],
+        customHex: null
+      }
+    };
+
+    /**
+     * ==================== MISSION 1 CURRICULUM DATA ====================
+     */
+    const M1_CHALLENGES = [
+      {
+        id: 'tv',
+        fileName: 'tv_shows.txt',
+        badge: 'Test Review Q2 Exact File',
+        description: 'A broadcast journalism data file storing Network, Program Name, and Host on consecutive lines.',
+        lines: [
+          'NBC',
+          'Dateline',
+          'Jane Pauley',
+          'CBS',
+          '60 Minutes',
+          'Morley Safer',
+          'ABC',
+          'Prime Time Live',
+          'Diane Sawyer',
+          'CBC',
+          'The Fifth Estate',
+          'Lynden MacIntyre'
+        ],
+        recordPrompt: 'Click all 3 lines that make up Record #2 (the CBS entry):',
+        recordTargetLines: [4, 5, 6], // 1-indexed
+        recordHint: 'Record #1 is lines 1–3 (NBC). Record #2 starts on line 4 (CBS) and includes its program and host!',
+        fieldPrompt: 'Now click the "Anchor / Host Name" field across ALL 4 records (4 lines total):',
+        fieldTargetLines: [3, 6, 9, 12],
+        fieldHint: 'Notice the repeating 3-line pattern: Network (1,4,7,10), Show Title (2,5,8,11), and Host Name (3,6,9,12).',
+        filesCount: 1,
+        recordsCount: 4,
+        fieldsCount: 3,
+        countExplanation: 'There are 12 lines total, grouped into 4 complete entries (Records) of 3 pieces of information each (Fields: Network, Show, Host), all stored in 1 File.'
+      },
+      {
+        id: 'students',
+        fileName: 'students.txt',
+        badge: 'ICS3U Slides Dataset',
+        description: 'Student roster storing Student #, Surname, Age, Grade, and Homeroom.',
+        lines: [
+          '340112',
+          'Patel',
+          '16',
+          '11',
+          '11B',
+          '340298',
+          'Tremblay',
+          '17',
+          '12',
+          '12A',
+          '340415',
+          'Okafor',
+          '16',
+          '11',
+          '11C'
+        ],
+        recordPrompt: 'Click all 5 lines belonging to Record #3 (Okafor):',
+        recordTargetLines: [11, 12, 13, 14, 15],
+        recordHint: 'Each student record has 5 fields: Student #, Surname, Age, Grade, Homeroom. Record #3 is the last 5 lines.',
+        fieldPrompt: 'Click the "Homeroom" field across ALL 3 student records (3 lines total):',
+        fieldTargetLines: [5, 10, 15],
+        fieldHint: 'Homeroom is the 5th field in every 5-line student record (Lines 5, 10, and 15).',
+        filesCount: 1,
+        recordsCount: 3,
+        fieldsCount: 5,
+        countExplanation: '15 lines ÷ 5 fields per student = 3 Records, with 5 Fields per record, inside 1 File.'
+      },
+      {
+        id: 'nhl',
+        fileName: 'nhl_awards.txt',
+        badge: 'Test Review Q3 Dataset',
+        description: 'NHL player stats: Name, Goals, Goals On For, Goals On Against, Shots, Penalty Minutes.',
+        lines: [
+          'Crosby',
+          '66',
+          '98',
+          '70',
+          '200',
+          '57',
+          'McDavid',
+          '64',
+          '112',
+          '84',
+          '245',
+          '36',
+          'Matthews',
+          '69',
+          '104',
+          '73',
+          '260',
+          '20'
+        ],
+        recordPrompt: 'Click all 6 lines belonging to Record #1 (Crosby):',
+        recordTargetLines: [1, 2, 3, 4, 5, 6],
+        recordHint: 'Crosby’s record starts at line 1 and includes all 6 stats down to Penalty Minutes (57) on line 6.',
+        fieldPrompt: 'Click the "Goals" field (2nd line of each player) across ALL 3 players:',
+        fieldTargetLines: [2, 8, 14],
+        fieldHint: 'Name is lines 1, 7, 13. Goals is immediately below each player name: lines 2, 8, and 14.',
+        filesCount: 1,
+        recordsCount: 3,
+        fieldsCount: 6,
+        countExplanation: '18 lines grouped into 3 player Records with 6 statistical Fields each, saved in 1 File.'
+      }
+    ];
+
+    /**
+     * ==================== MISSION 2 CURRICULUM DATA ====================
+     */
+    const M2_PATH_CHALLENGES = [
+      {
+        title: 'Path Bug #1: Student NetBeans Submission Won’t Run on Teacher’s PC',
+        context: 'A student wrote the line below in NetBeans. It worked on their home laptop, but crashed with FileNotFoundException on the classroom computer:',
+        brokenCode: 'File file = new File("C:\\\\Users\\\\alex\\\\Documents\\\\NetBeansProjects\\\\TestReview\\\\src\\\\testreview\\\\STUDENTS.txt");',
+        question: 'Which fix uses a proper NetBeans project-relative path?',
+        options: [
+          {
+            code: 'File file = new File("src/testreview/STUDENTS.txt");',
+            correct: true,
+            explanation: 'Correct! NetBeans runs programs from the project root folder, so starting with "src/packagename/FILENAME.txt" works on Windows, macOS, and Linux!'
+          },
+          {
+            code: 'File file = new File("STUDENTS.txt");',
+            correct: false,
+            explanation: 'When you create a text file inside your package in NetBeans, it lives inside "src/testreview/", not the root directory.'
+          },
+          {
+            code: 'File file = new File("src\\testreview\\STUDENTS.txt");',
+            correct: false,
+            explanation: 'Careful! Single backslashes inside a Java String act as escape characters (\\t becomes a Tab!). You must use forward slashes "/" or double backslashes "\\\\".'
+          }
+        ]
+      },
+      {
+        title: 'Path Bug #2: Windows Backslash Escape Sequence Trap',
+        context: 'Another student remembered to use a relative path in Windows format, but NetBeans underlined \\t in red/amber because \\t is an escape sequence:',
+        brokenCode: 'File file = new File("src\\testreview\\data.txt");',
+        question: 'How do you fix this Windows path string in Java?',
+        options: [
+          {
+            code: 'File file = new File("src\\\\testreview\\\\data.txt");',
+            correct: true,
+            explanation: 'Spot on! In Java Strings, "\\\\" produces a single literal backslash so "\\t" is not interpreted as a Tab character.'
+          },
+          {
+            code: 'File file = new File("C:/src/testreview/data.txt");',
+            correct: false,
+            explanation: 'Do not put "C:/" at the start—that makes it an absolute path from the C: drive root rather than your NetBeans project folder.'
+          },
+          {
+            code: 'File file = new File(src/testreview/data.txt);',
+            correct: false,
+            explanation: 'The file path passed to new File(...) must be enclosed in double quotation marks as a String.'
+          }
+        ]
+      }
+    ];
+
+    /**
+     * ==================== MISSION 3 CURRICULUM DATA ====================
+     */
+    const M3_CASES = [
+      {
+        title: 'Case 1: DataFileScannerExample.java (Teacher Reference)',
+        fileName: 'data.txt',
+        javaFileName: 'DataFileScannerExample.java',
+        fileLines: ['Alex', '16', 'Maya', '17', 'Jordan', '15'],
+        question: 'After the while (scanner.hasNextLine()) loop finishes reading all 6 lines of data.txt, what is the final value of ageDays for Jordan?',
+        options: ['5475', '5840', '6205', '15'],
+        correctIdx: 0,
+        predExplanation: 'Jordan is the last record in data.txt with age = 15. 15 * 365 = 5475!',
+        code: [
+          'String name, sAge;',
+          'int age, ageDays;',
+          'String output = "Name\\tAge in Days\\n";',
+          'try {',
+          '    File file = new File("src/example/data.txt");',
+          '    Scanner scanner = new Scanner(file);',
+          '    while (scanner.hasNextLine()) {',
+          '        name = scanner.nextLine();',
+          '        sAge = scanner.nextLine();',
+          '        age = Integer.parseInt(sAge);',
+          '        ageDays = age * 365;',
+          '        output = output + name + "\\t" + ageDays + "\\n";',
+          '    }',
+          '} catch (FileNotFoundException e) {',
+          '    System.out.println("Error: " + e);',
+          '}',
+          'System.out.println(output);'
+        ],
+        trace: [
+          { line: 6, pointer: 0, consumed: 0, recordNum: 0, vars: { name: 'null', sAge: 'null', age: '0', ageDays: '0' }, output: 'Name\tAge in Days\n', note: 'Scanner opened at top of data.txt (Line 1 ready).' },
+          { line: 8, pointer: 1, consumed: 1, recordNum: 1, vars: { name: '"Alex"', sAge: 'null', age: '0', ageDays: '0' }, output: 'Name\tAge in Days\n', note: 'Record 1: scanner.nextLine() reads "Alex" into name; pointer advances to line 2.' },
+          { line: 9, pointer: 2, consumed: 2, recordNum: 1, vars: { name: '"Alex"', sAge: '"16"', age: '0', ageDays: '0' }, output: 'Name\tAge in Days\n', note: 'Record 1: scanner.nextLine() reads "16" as a String into sAge.' },
+          { line: 12, pointer: 2, consumed: 2, recordNum: 1, vars: { name: '"Alex"', sAge: '"16"', age: '16', ageDays: '5840' }, output: 'Name\tAge in Days\nAlex\t5840\n', note: 'Parsed age = 16, calculated 16 * 365 = 5840, appended Alex to output.' },
+          { line: 8, pointer: 3, consumed: 3, recordNum: 2, vars: { name: '"Maya"', sAge: '"16"', age: '16', ageDays: '5840' }, output: 'Name\tAge in Days\nAlex\t5840\n', note: 'Record 2: scanner.hasNextLine() is true! Reads "Maya" into name.' },
+          { line: 9, pointer: 4, consumed: 4, recordNum: 2, vars: { name: '"Maya"', sAge: '"17"', age: '16', ageDays: '5840' }, output: 'Name\tAge in Days\nAlex\t5840\n', note: 'Record 2: Reads "17" into sAge.' },
+          { line: 12, pointer: 4, consumed: 4, recordNum: 2, vars: { name: '"Maya"', sAge: '"17"', age: '17', ageDays: '6205' }, output: 'Name\tAge in Days\nAlex\t5840\nMaya\t6205\n', note: 'Parsed age = 17, calculated 17 * 365 = 6205, appended Maya to output.' },
+          { line: 8, pointer: 5, consumed: 5, recordNum: 3, vars: { name: '"Jordan"', sAge: '"17"', age: '17', ageDays: '6205' }, output: 'Name\tAge in Days\nAlex\t5840\nMaya\t6205\n', note: 'Record 3: scanner.hasNextLine() is true! Reads "Jordan" into name.' },
+          { line: 9, pointer: 6, consumed: 6, recordNum: 3, vars: { name: '"Jordan"', sAge: '"15"', age: '17', ageDays: '6205' }, output: 'Name\tAge in Days\nAlex\t5840\nMaya\t6205\n', note: 'Record 3: Reads "15" into sAge. Pointer is now at EOF (End of File).' },
+          { line: 17, pointer: 6, consumed: 6, recordNum: 3, vars: { name: '"Jordan"', sAge: '"15"', age: '15', ageDays: '5475' }, output: 'Name\tAge in Days\nAlex\t5840\nMaya\t6205\nJordan\t5475\n', note: 'ageDays = 5475 appended. scanner.hasNextLine() is now FALSE — loop exits and prints output!' }
+        ]
+      },
+      {
+        title: 'Case 2: NHL Plus/Minus Calculator (Test Review Q3)',
+        fileName: 'nhl.txt',
+        javaFileName: 'NHLReport.java',
+        fileLines: ['Crosby', '98', '70', 'Rielly', '62', '71'],
+        question: 'Plus/minus is calculated as (goalsFor - goalsAgainst). What is the plusMinus value computed for Rielly in Record 2?',
+        options: ['-9', '9', '28', '133'],
+        correctIdx: 0,
+        predExplanation: 'For Rielly, goalsFor = 62 and goalsAgainst = 71. 62 - 71 = -9 (negative plus/minus is valid!).',
+        code: [
+          'String player;',
+          'int goalsFor, goalsAgainst, plusMinus;',
+          'String report = "Player\\t+/-\\n";',
+          'try {',
+          '    Scanner sc = new Scanner(new File("src/nhl/nhl.txt"));',
+          '    while (sc.hasNextLine()) {',
+          '        player = sc.nextLine();',
+          '        goalsFor = Integer.parseInt(sc.nextLine());',
+          '        goalsAgainst = Integer.parseInt(sc.nextLine());',
+          '        plusMinus = goalsFor - goalsAgainst;',
+          '        report += player + "\\t" + plusMinus + "\\n";',
+          '    }',
+          '} catch (FileNotFoundException e) {',
+          '    System.out.println("Error: " + e);',
+          '}',
+          'System.out.println(report);'
+        ],
+        trace: [
+          { line: 5, pointer: 0, consumed: 0, recordNum: 0, vars: { player: 'null', goalsFor: '0', goalsAgainst: '0', plusMinus: '0' }, output: 'Player\t+/-\n', note: 'Scanner positioned at line 1 of nhl.txt.' },
+          { line: 7, pointer: 1, consumed: 1, recordNum: 1, vars: { player: '"Crosby"', goalsFor: '0', goalsAgainst: '0', plusMinus: '0' }, output: 'Player\t+/-\n', note: 'Record 1: Read player = "Crosby".' },
+          { line: 9, pointer: 3, consumed: 3, recordNum: 1, vars: { player: '"Crosby"', goalsFor: '98', goalsAgainst: '70', plusMinus: '0' }, output: 'Player\t+/-\n', note: 'Record 1: Parsed goalsFor = 98 and goalsAgainst = 70.' },
+          { line: 11, pointer: 3, consumed: 3, recordNum: 1, vars: { player: '"Crosby"', goalsFor: '98', goalsAgainst: '70', plusMinus: '28' }, output: 'Player\t+/-\nCrosby\t28\n', note: 'plusMinus = 98 - 70 = 28. Appended Crosby to report.' },
+          { line: 7, pointer: 4, consumed: 4, recordNum: 2, vars: { player: '"Rielly"', goalsFor: '98', goalsAgainst: '70', plusMinus: '28' }, output: 'Player\t+/-\nCrosby\t28\n', note: 'Record 2: Read player = "Rielly".' },
+          { line: 9, pointer: 6, consumed: 6, recordNum: 2, vars: { player: '"Rielly"', goalsFor: '62', goalsAgainst: '71', plusMinus: '28' }, output: 'Player\t+/-\nCrosby\t28\n', note: 'Record 2: Parsed goalsFor = 62 and goalsAgainst = 71. At EOF.' },
+          { line: 16, pointer: 6, consumed: 6, recordNum: 2, vars: { player: '"Rielly"', goalsFor: '62', goalsAgainst: '71', plusMinus: '-9' }, output: 'Player\t+/-\nCrosby\t28\nRielly\t-9\n', note: 'plusMinus = 62 - 71 = -9. Loop terminates and prints report!' }
+        ]
+      },
+      {
+        title: 'Case 3: Credit Card Finance Charge (Exercise #4)',
+        fileName: 'accounts.txt',
+        javaFileName: 'CreditAccounts.java',
+        fileLines: ['123-AB', '200.00', '456-CD', '500.00'],
+        question: 'Finance charge is 1.5% (0.015) of the unpaid past due amount. What financeCharge is computed for account 456-CD?',
+        options: ['7.5', '75.0', '3.0', '0.075'],
+        correctIdx: 0,
+        predExplanation: '500.00 * 0.015 = 7.5 (1.5% of $500 is $7.50).',
+        code: [
+          'String acct;',
+          'double pastDue, financeCharge;',
+          'String table = "Acct\\tFee\\n";',
+          'try {',
+          '    Scanner sc = new Scanner(new File("src/cc/accounts.txt"));',
+          '    while (sc.hasNextLine()) {',
+          '        acct = sc.nextLine();',
+          '        pastDue = Double.parseDouble(sc.nextLine());',
+          '        financeCharge = pastDue * 0.015;',
+          '        table += acct + "\\t$" + financeCharge + "\\n";',
+          '    }',
+          '} catch (FileNotFoundException e) {',
+          '    System.out.println("Error: " + e);',
+          '}',
+          'System.out.println(table);'
+        ],
+        trace: [
+          { line: 5, pointer: 0, consumed: 0, recordNum: 0, vars: { acct: 'null', pastDue: '0.0', financeCharge: '0.0' }, output: 'Acct\tFee\n', note: 'Scanner opened on accounts.txt.' },
+          { line: 8, pointer: 2, consumed: 2, recordNum: 1, vars: { acct: '"123-AB"', pastDue: '200.0', financeCharge: '0.0' }, output: 'Acct\tFee\n', note: 'Record 1: Read acct = "123-AB" and parsed pastDue = 200.0.' },
+          { line: 10, pointer: 2, consumed: 2, recordNum: 1, vars: { acct: '"123-AB"', pastDue: '200.0', financeCharge: '3.0' }, output: 'Acct\tFee\n123-AB\t$3.0\n', note: '200.0 * 0.015 = 3.0. Appended to table.' },
+          { line: 8, pointer: 4, consumed: 4, recordNum: 2, vars: { acct: '"456-CD"', pastDue: '500.0', financeCharge: '3.0' }, output: 'Acct\tFee\n123-AB\t$3.0\n', note: 'Record 2: Read acct = "456-CD" and parsed pastDue = 500.0. Reached EOF.' },
+          { line: 15, pointer: 4, consumed: 4, recordNum: 2, vars: { acct: '"456-CD"', pastDue: '500.0', financeCharge: '7.5' }, output: 'Acct\tFee\n123-AB\t$3.0\n456-CD\t$7.5\n', note: '500.0 * 0.015 = 7.5. Loop ends and prints table!' }
+        ]
+      }
+    ];
+
+    /**
+     * ==================== MISSION 4 CURRICULUM DATA ====================
+     */
+    const M4_BUGS = [
+      {
+        title: 'Bug #1: The Integer Division Truncation Trap',
+        sourceTag: 'Exercises Part 1 · Q3 LPT',
+        scenario: 'A student wrote this loop to calculate the percentage of Leafs fans in the "Under 20" age group (39,168 Leafs fans out of 76,370 total fans):',
+        buggyCode: [
+          'int leafs = Integer.parseInt(sc.nextLine()); // 39168',
+          'int habs  = Integer.parseInt(sc.nextLine()); // 37202',
+          'int total = leafs + habs;                    // 76370',
+          'double pctLeafs = (leafs / total) * 100;',
+          'System.out.println("Leafs %: " + pctLeafs);'
+        ],
+        buggyOutput: 'Leafs %: 0.0',
+        fixedOutput: 'Leafs %: 51.28715464187508',
+        bugExplanation: 'In Java, dividing an int (39168) by another int (76370) performs integer division, truncating 0.5128... to 0 BEFORE multiplying by 100 or storing in the double!',
+        question: 'Which code change fixes the integer division bug?',
+        options: [
+          {
+            label: 'double pctLeafs = ((double) leafs / total) * 100;',
+            correct: true,
+            feedback: 'Spot on! Casting (double) leafs forces floating-point division before dividing by total, producing 51.287...%.'
+          },
+          {
+            label: 'double pctLeafs = (double) (leafs / total) * 100;',
+            correct: false,
+            feedback: 'Too late! Putting (double) outside (leafs / total) still runs integer division (0) inside the parentheses first.'
+          },
+          {
+            label: 'int pctLeafs = (leafs / total) * 100;',
+            correct: false,
+            feedback: 'Changing the variable type to int still truncates 39168 / 76370 to 0.'
+          }
+        ]
+      },
+      {
+        title: 'Bug #2: The "Not Found" Loop Overwrite Trap',
+        sourceTag: 'Teacher Feedback · Search Exercise',
+        scenario: 'The file contains ["Maya", "Liam", "Noah"]. The user searches for target = "Maya" (the very first record in the file):',
+        buggyCode: [
+          'String status = "";',
+          'while (sc.hasNextLine()) {',
+          '    String name = sc.nextLine();',
+          '    if (name.equalsIgnoreCase(target)) {',
+          '        status = "Found: " + name;',
+          '    } else {',
+          '        status = "Not Found";',
+          '    }',
+          '}',
+          'System.out.println(status);'
+        ],
+        buggyOutput: 'Not Found   <-- WRONG! Maya was in the file!',
+        fixedOutput: 'Found: Maya',
+        bugExplanation: 'On iteration 1, "Maya" matches and sets status = "Found: Maya". On iterations 2 and 3 ("Liam" and "Noah"), the else branch runs and OVERWRITES status back to "Not Found"!',
+        question: 'How do you fix this classic search-loop bug?',
+        options: [
+          {
+            label: 'Initialize String status = "Not Found"; BEFORE the while loop, and delete the else block.',
+            correct: true,
+            feedback: 'Exact match with your teacher’s feedback! Start with status = "Not Found" before the loop, and only change it to "Found" when a match occurs.'
+          },
+          {
+            label: 'Move System.out.println(status); inside the while loop.',
+            correct: false,
+            feedback: 'Printing inside the loop prints a message for every single line in the file instead of one final search result.'
+          },
+          {
+            label: 'Change equalsIgnoreCase to ==',
+            correct: false,
+            feedback: 'Never compare Strings with == in Java, and the real bug is the else block overwriting status on subsequent records.'
+          }
+        ]
+      },
+      {
+        title: 'Bug #3: Misaligned Field Read (NumberFormatException)',
+        sourceTag: 'Data File Loop Alignment',
+        scenario: 'Each record in roster.txt has 3 lines: Name ("Patel"), Age ("16"), and Homeroom ("11B"). Look at what happens inside this while loop:',
+        buggyCode: [
+          'while (sc.hasNextLine()) {',
+          '    String name = sc.nextLine();',
+          '    int age = Integer.parseInt(sc.nextLine());',
+          '    // Forgot to read the 3rd field (Homeroom)!',
+          '    System.out.println(name + " is " + age);',
+          '}'
+        ],
+        buggyOutput: 'Patel is 16\nException in thread "main" java.lang.NumberFormatException: For input string: "Tremblay"',
+        fixedOutput: 'Patel is 16\nTremblay is 17',
+        bugExplanation: 'Iteration 1 reads "Patel" and "16", leaving "11B" unread! On Iteration 2, name reads "11B" and Integer.parseInt(sc.nextLine()) tries to parse "Tremblay" as an integer and crashes!',
+        question: 'What is the rule for reading fields inside a while (sc.hasNextLine()) loop?',
+        options: [
+          {
+            label: 'Read ALL fields of the record (add String homeroom = sc.nextLine();) during every loop iteration.',
+            correct: true,
+            feedback: 'Correct! Every iteration of the while loop must consume an entire record (all 3 lines) so the Scanner stays aligned for the next record.'
+          },
+          {
+            label: 'Change while (sc.hasNextLine()) to if (sc.hasNextLine())',
+            correct: false,
+            feedback: 'Using if instead of while would only read the very first student and ignore the rest of the file.'
+          },
+          {
+            label: 'Use Double.parseDouble(sc.nextLine()) instead of Integer.parseInt',
+            correct: false,
+            feedback: '"Tremblay" is text, not a decimal number—it will still crash unless you consume the 3rd field ("11B") at the end of Record 1.'
+          }
+        ]
+      }
+    ];
+
+    /**
+     * ==================== MISSION 5 CURRICULUM DATA ====================
+     */
+    const M5_BINARY_PROBLEMS = [
+      { label: 'Test Q4a', binary: '1010', decimal: 10, hint: '8 + 2 = 10' },
+      { label: 'Test Q4b', binary: '1000001', decimal: 65, hint: '64 + 1 = 65' },
+      { label: 'Test Q4c', binary: '10111001', decimal: 185, hint: '128 + 32 + 16 + 8 + 1 = 185' },
+      { label: 'Test Q4d', binary: '11110000', decimal: 240, hint: '128 + 64 + 32 + 16 = 240 (first byte of 1111000011110000!)' }
+    ];
+
+    const M5_HEX_PROBLEMS = [
+      { label: 'Test Q4a', hex: 'FF', decimal: 255, hint: 'F=15 → (15 × 16) + (15 × 1) = 240 + 15 = 255' },
+      { label: 'Test Q4b', hex: 'CDE', decimal: 3294, hint: 'C=12, D=13, E=14 → (12 × 256) + (13 × 16) + (14 × 1) = 3072 + 208 + 14 = 3294' },
+      { label: 'Test Q4c', hex: '116', decimal: 278, hint: '(1 × 256) + (1 × 16) + (6 × 1) = 256 + 16 + 6 = 278' },
+      { label: 'Test Q4d', hex: '6D6', decimal: 1750, hint: 'D=13 → (6 × 256) + (13 × 16) + (6 × 1) = 1536 + 208 + 6 = 1750' }
+    ];
+
+    const MISSION_META = [
+      {
+        num: 1,
+        short: 'File / Record / Field',
+        title: 'File, Record & Field Anatomy',
+        weight: 'Test Part 1: Q2 & Q3 (9 Knowledge Marks)',
+        subtext: 'Inspect multi-line ICS3U text files, highlight specific records and fields, and verify exact structural counts.'
+      },
+      {
+        num: 2,
+        short: 'NetBeans & Scanner',
+        title: 'NetBeans File & Scanner Command Builder',
+        weight: 'Test Part 1 Q1 & Part 2 Setup',
+        subtext: 'Fix broken file paths and construct exact Java File, Scanner, while-loop, and try-catch commands.'
+      },
+      {
+        num: 3,
+        short: 'Scanner Loop Trace',
+        title: 'Visual Scanner Cursor & Loop Trace',
+        weight: 'Test Part 1 Q1 & Part 2 Tracing',
+        subtext: 'Predict variable outputs, then step the Scanner pointer line-by-line through realistic ICS3U data files.'
+      },
+      {
+        num: 4,
+        short: 'ICS3U Bug Hunter',
+        title: 'ICS3U Bug Hunter — Logic & Condition Traps',
+        weight: 'Test Part 1 Q1 (11 App) & Part 2 Debugging',
+        subtext: 'Diagnose and patch real ICS3U mistakes: integer division truncation, search loop overwrites, and misaligned reads.'
+      },
+      {
+        num: 5,
+        short: 'Binary & Hex Lab',
+        title: 'No-Calculator Number Systems Lab',
+        weight: 'Test Part 1: Q4 & Q5 (4 Knowledge Marks)',
+        subtext: 'Convert Binary and Hexadecimal numbers to Decimal using interactive place-value boards and your 4-Function Calculator.'
+      }
+    ];
+
+    /**
+     * Helper: Safe Java Syntax Highlighter
+     */
+    function highlightJava(raw) {
+      let esc = raw
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      if (!esc.trim()) return '&nbsp;';
+
+      // Comments
+      const commentIdx = esc.indexOf('//');
+      let commentPart = '';
+      if (commentIdx !== -1) {
+        commentPart = `<span class="tok-comment">${esc.slice(commentIdx)}</span>`;
+        esc = esc.slice(0, commentIdx);
+      }
+
+      // Strings
+      const strings = [];
+      esc = esc.replace(/("(?:\\.|[^"\\])*")/g, (m) => {
+        const tok = `__STR_${strings.length}__`;
+        strings.push(`<span class="tok-str">${m}</span>`);
+        return tok;
+      });
+
+      esc = esc.replace(/\b(public|private|static|void|int|double|boolean|if|else|while|try|catch|new|return)\b/g, '<span class="tok-kw">$1</span>');
+      esc = esc.replace(/\b(String|File|Scanner|FileNotFoundException|Integer|Double|System)\b/g, '<span class="tok-type">$1</span>');
+      esc = esc.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\s*\()/g, (m, fn) => {
+        if (['if', 'while', 'catch', 'return'].includes(fn)) return fn;
+        return `<span class="tok-method">${fn}</span>`;
+      });
+      esc = esc.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="tok-num">$1</span>');
+
+      strings.forEach((s, i) => {
+        esc = esc.replace(`__STR_${i}__`, s);
+      });
+
+      return esc + commentPart;
+    }
+
+    /**
+     * Check mission completion & update overall Test Readiness bar
+     */
+    function checkAndSyncProgress() {
+      // Mission 1 complete when definitions matched AND all 3 datasets have click + counts solved
+      if (
+        appState.m1.defsMatched &&
+        appState.m1.clickSolved.every(Boolean) &&
+        appState.m1.countsSolved.every(Boolean)
+      ) {
+        appState.completedMissions.add(1);
+      }
+
+      // Mission 2 complete when both paths solved AND command builder solved
+      if (appState.m2.pathSolved.every(Boolean) && appState.m2.commandsSolved) {
+        appState.completedMissions.add(2);
+      }
+
+      // Mission 3 complete when all 3 cases have been predicted & traced
+      if (appState.m3.predicted.every(Boolean) && appState.m3.tracedComplete.every(Boolean)) {
+        appState.completedMissions.add(3);
+      }
+
+      // Mission 4 complete when all 3 bugs solved
+      if (appState.m4.bugsSolved.every(Boolean)) {
+        appState.completedMissions.add(4);
+      }
+
+      // Mission 5 complete when all 4 Binary & 4 Hex test review problems solved
+      if (appState.m5.binSolved.every(Boolean) && appState.m5.hexSolved.every(Boolean)) {
+        appState.completedMissions.add(5);
+      }
+
+      // Calculate granular readiness percentage across all sub-tasks
+      let totalTasks = 0;
+      let doneTasks = 0;
+
+      // M1: 1 def + 3 click + 3 count = 7
+      totalTasks += 7;
+      if (appState.m1.defsMatched) doneTasks++;
+      doneTasks += appState.m1.clickSolved.filter(Boolean).length;
+      doneTasks += appState.m1.countsSolved.filter(Boolean).length;
+
+      // M2: 2 path + 1 command builder = 3
+      totalTasks += 3;
+      doneTasks += appState.m2.pathSolved.filter(Boolean).length;
+      if (appState.m2.commandsSolved) doneTasks++;
+
+      // M3: 3 predict + 3 trace = 6
+      totalTasks += 6;
+      doneTasks += appState.m3.predicted.filter(Boolean).length;
+      doneTasks += appState.m3.tracedComplete.filter(Boolean).length;
+
+      // M4: 3 bugs = 3
+      totalTasks += 3;
+      doneTasks += appState.m4.bugsSolved.filter(Boolean).length;
+
+      // M5: 4 binary + 4 hex = 8
+      totalTasks += 8;
+      doneTasks += appState.m5.binSolved.filter(Boolean).length;
+      doneTasks += appState.m5.hexSolved.filter(Boolean).length;
+
+      const pct = Math.round((doneTasks / totalTasks) * 100);
+      document.getElementById('readiness-bar').style.width = `${pct}%`;
+      document.getElementById('readiness-pct').textContent = `${pct}%`;
+
+      // Show Test-Ready Banner when all 5 missions complete
+      const banner = document.getElementById('test-ready-banner');
+      if (appState.completedMissions.size === 5) {
+        banner.classList.remove('hidden');
+      }
+    }
+
+    /**
+     * Render Top Mission Tabs & Active Mission Header
+     */
+    function renderHeaderAndNav() {
+      const nav = document.getElementById('mission-nav');
+      nav.innerHTML = '';
+
+      MISSION_META.forEach((m) => {
+        const isCurrent = appState.activeMission === m.num;
+        const isDone = appState.completedMissions.has(m.num);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+
+        let cls = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold border transition-all shrink-0 ';
+        if (isCurrent) {
+          cls += 'bg-indigo-600 border-indigo-400 text-white shadow-md';
+        } else if (isDone) {
+          cls += 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25';
+        } else {
+          cls += 'bg-slate-800/90 border-slate-700 text-slate-300 hover:border-slate-500';
+        }
+
+        btn.className = cls;
+        btn.innerHTML = `
+          <span>${isDone ? '✓' : `M${m.num}`}</span>
+          <span class="hidden sm:inline">${m.short}</span>
+        `;
+        btn.addEventListener('click', () => {
+          appState.activeMission = m.num;
+          renderAll();
+        });
+        nav.appendChild(btn);
+      });
+
+      const meta = MISSION_META[appState.activeMission - 1];
+      document.getElementById('mission-badge').textContent = `MISSION ${meta.num} OF 5`;
+      document.getElementById('mission-test-weight').textContent = meta.weight;
+      document.getElementById('mission-heading').textContent = meta.title;
+      document.getElementById('mission-subtext').textContent = meta.subtext;
+
+      const statusBox = document.getElementById('mission-status-box');
+      if (appState.completedMissions.has(meta.num)) {
+        statusBox.className = 'flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-100 border border-emerald-300 text-xs font-mono font-bold text-emerald-900';
+        statusBox.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span><span>Mission Complete ✓</span>';
+      } else {
+        statusBox.className = 'flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-mono font-semibold text-slate-700';
+        statusBox.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span>In Progress</span>';
+      }
+    }
+
+    /**
+     * ==================== RENDER MISSION 1 ====================
+     */
+    function renderMission1(container) {
+      const ch = M1_CHALLENGES[appState.m1.challengeIdx];
+      const cIdx = appState.m1.challengeIdx;
+
+      container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <!-- Left Column: Interactive .txt Data File Viewer -->
+          <div class="lg:col-span-5 rounded-2xl bg-slate-900 text-slate-100 border border-slate-800 shadow-xl overflow-hidden">
+            <div class="px-4 py-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono text-xs font-bold">.TXT</span>
+                <span class="font-mono text-sm font-bold text-white">${ch.fileName}</span>
+              </div>
+              <span class="text-[11px] font-mono text-slate-400">${ch.lines.length} lines</span>
+            </div>
+
+            <!-- Dataset Selector Tabs (A, B, C) -->
+            <div class="px-3 py-2 bg-slate-900/90 border-b border-slate-800 flex items-center gap-1.5 overflow-x-auto">
+              ${M1_CHALLENGES.map((item, idx) => {
+                const done = appState.m1.clickSolved[idx] && appState.m1.countsSolved[idx];
+                const active = idx === cIdx;
+                return `
+                  <button type="button" data-m1-tab="${idx}"
+                    class="px-2.5 py-1 rounded-lg font-mono text-xs font-semibold border transition-all shrink-0 ${
+                      active
+                        ? 'bg-indigo-600 border-indigo-400 text-white'
+                        : done
+                        ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-500'
+                    }">
+                    ${done ? '✓ ' : ''}${item.fileName}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            <div class="px-4 py-2 bg-slate-800/60 border-b border-slate-800 text-xs text-slate-300">
+              ${ch.description}
+            </div>
+
+            <!-- Clickable Lines of the .txt Data File -->
+            <div id="m1-file-lines" class="py-2 font-mono text-xs sm:text-sm select-none">
+              ${ch.lines.map((lineText, idx) => {
+                const lineNum = idx + 1;
+                const isSelected = appState.m1.selectedLines.has(lineNum);
+                return `
+                  <div data-m1-line="${lineNum}"
+                    class="flex items-center justify-between px-4 py-1.5 cursor-pointer transition-colors border-l-4 ${
+                      isSelected
+                        ? 'bg-indigo-500/25 border-indigo-400 text-white font-semibold'
+                        : 'border-transparent hover:bg-slate-800/80 text-slate-200'
+                    }">
+                    <div class="flex items-center gap-3">
+                      <span class="w-5 text-right text-slate-500 text-xs">${lineNum}</span>
+                      <span>${lineText}</span>
+                    </div>
+                    ${isSelected ? '<span class="px-2 py-0.5 rounded bg-indigo-500 text-white text-[10px] font-bold">SELECTED</span>' : ''}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <div class="px-4 py-2.5 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-400">
+              <span>Click lines above to select/deselect</span>
+              <button type="button" id="m1-clear-lines-btn" class="text-amber-400 hover:underline">Clear Selection (${appState.m1.selectedLines.size})</button>
+            </div>
+          </div>
+
+          <!-- Right Column: Theory Definitions + Interactive Tasks -->
+          <div class="lg:col-span-7 space-y-5">
+            <!-- Part A: ICS3U Slide Definitions Match -->
+            <div class="paper-card rounded-2xl p-4 sm:p-5">
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <h3 class="font-bold text-slate-900 text-base">
+                  Part A: Match Official ICS3U Definitions
+                </h3>
+                ${
+                  appState.m1.defsMatched
+                    ? '<span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ Matched</span>'
+                    : '<span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-amber-100 text-amber-900">Required</span>'
+                }
+              </div>
+
+              <div class="space-y-2.5 text-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-paper-subtle border border-paper-border">
+                  <span class="text-slate-700">1. "A collection of related records treated as a unit and stored under the same file name"</span>
+                  <select id="m1-def-file" ${appState.m1.defsMatched ? 'disabled' : ''}
+                    class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-mono text-xs font-bold text-slate-900 shrink-0">
+                    <option value="">-- Choose Term --</option>
+                    <option value="File" ${appState.m1.defAnswers.file === 'File' ? 'selected' : ''}>File</option>
+                    <option value="Record" ${appState.m1.defAnswers.file === 'Record' ? 'selected' : ''}>Record</option>
+                    <option value="Field" ${appState.m1.defAnswers.file === 'Field' ? 'selected' : ''}>Field</option>
+                  </select>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-paper-subtle border border-paper-border">
+                  <span class="text-slate-700">2. "A complete entry about one topic or one person within a file"</span>
+                  <select id="m1-def-record" ${appState.m1.defsMatched ? 'disabled' : ''}
+                    class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-mono text-xs font-bold text-slate-900 shrink-0">
+                    <option value="">-- Choose Term --</option>
+                    <option value="File" ${appState.m1.defAnswers.record === 'File' ? 'selected' : ''}>File</option>
+                    <option value="Record" ${appState.m1.defAnswers.record === 'Record' ? 'selected' : ''}>Record</option>
+                    <option value="Field" ${appState.m1.defAnswers.record === 'Field' ? 'selected' : ''}>Field</option>
+                  </select>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-paper-subtle border border-paper-border">
+                  <span class="text-slate-700">3. "An area within a record which contains one specific type of information (e.g., name, age)"</span>
+                  <select id="m1-def-field" ${appState.m1.defsMatched ? 'disabled' : ''}
+                    class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-mono text-xs font-bold text-slate-900 shrink-0">
+                    <option value="">-- Choose Term --</option>
+                    <option value="File" ${appState.m1.defAnswers.field === 'File' ? 'selected' : ''}>File</option>
+                    <option value="Record" ${appState.m1.defAnswers.field === 'Record' ? 'selected' : ''}>Record</option>
+                    <option value="Field" ${appState.m1.defAnswers.field === 'Field' ? 'selected' : ''}>Field</option>
+                  </select>
+                </div>
+              </div>
+
+              ${
+                !appState.m1.defsMatched
+                  ? `<button type="button" id="m1-check-defs-btn" class="mt-3 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm transition-colors">Check Definitions</button>`
+                  : ''
+              }
+              <div id="m1-def-feedback" class="hidden mt-3 p-3 rounded-xl text-xs sm:text-sm border"></div>
+            </div>
+
+            <!-- Part B: Interactive Line Clicking & Count Verification for Active .txt File -->
+            <div class="paper-card rounded-2xl p-4 sm:p-5 space-y-4">
+              <div class="flex items-center justify-between gap-2">
+                <h3 class="font-bold text-slate-900 text-base">
+                  Part B: Inspect <code class="font-mono text-indigo-700">${ch.fileName}</code> (${ch.badge})
+                </h3>
+                <span class="text-xs font-mono text-slate-500">Dataset ${cIdx + 1} of 3</span>
+              </div>
+
+              <!-- Step 1: Line Clicking Challenge -->
+              <div class="p-4 rounded-xl bg-indigo-50/70 border border-indigo-200">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <span class="text-xs font-mono font-bold uppercase text-indigo-800">Step 1 · Interactive Line Highlighting</span>
+                  ${appState.m1.clickSolved[cIdx] ? '<span class="text-xs font-mono font-bold text-emerald-700">✓ Completed</span>' : ''}
+                </div>
+                <p class="text-sm font-semibold text-slate-900 mb-3">
+                  ${
+                    appState.m1.clickSolved[cIdx]
+                      ? `All Record & Field line selections verified for ${ch.fileName}!`
+                      : appState.m1.step === 'CLICK_RECORD'
+                      ? ch.recordPrompt
+                      : ch.fieldPrompt
+                  }
+                </p>
+
+                ${
+                  !appState.m1.clickSolved[cIdx]
+                    ? `<button type="button" id="m1-verify-lines-btn" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors">
+                        Verify Highlighted Lines (${appState.m1.selectedLines.size} selected)
+                      </button>`
+                    : ''
+                }
+                <div id="m1-click-feedback" class="hidden mt-3 p-3 rounded-xl text-xs sm:text-sm border"></div>
+              </div>
+
+              <!-- Step 2: Count Verification (Files, Records, Fields) -->
+              <div class="p-4 rounded-xl bg-paper-subtle border border-paper-border">
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <span class="text-xs font-mono font-bold uppercase text-slate-700">Step 2 · Count Verification (Test Q2 Style)</span>
+                  ${appState.m1.countsSolved[cIdx] ? '<span class="text-xs font-mono font-bold text-emerald-700">✓ Verified</span>' : ''}
+                </div>
+                <p class="text-xs sm:text-sm text-slate-600 mb-3">
+                  Examine <code class="font-mono font-bold text-slate-800">${ch.fileName}</code> on the left and enter the exact counts:
+                </p>
+
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                  <div>
+                    <label for="m1-in-files" class="block text-xs font-mono font-bold text-slate-700 mb-1">How many Files?</label>
+                    <input id="m1-in-files" type="number" min="0" value="${appState.m1.countsSolved[cIdx] ? ch.filesCount : ''}" ${appState.m1.countsSolved[cIdx] ? 'disabled' : ''}
+                      class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white font-mono text-sm font-bold text-slate-900" placeholder="#" />
+                  </div>
+                  <div>
+                    <label for="m1-in-records" class="block text-xs font-mono font-bold text-slate-700 mb-1">How many Records?</label>
+                    <input id="m1-in-records" type="number" min="0" value="${appState.m1.countsSolved[cIdx] ? ch.recordsCount : ''}" ${appState.m1.countsSolved[cIdx] ? 'disabled' : ''}
+                      class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white font-mono text-sm font-bold text-slate-900" placeholder="#" />
+                  </div>
+                  <div>
+                    <label for="m1-in-fields" class="block text-xs font-mono font-bold text-slate-700 mb-1">How many Fields?</label>
+                    <input id="m1-in-fields" type="number" min="0" value="${appState.m1.countsSolved[cIdx] ? ch.fieldsCount : ''}" ${appState.m1.countsSolved[cIdx] ? 'disabled' : ''}
+                      class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white font-mono text-sm font-bold text-slate-900" placeholder="#" />
+                  </div>
+                </div>
+
+                ${
+                  !appState.m1.countsSolved[cIdx]
+                    ? `<button type="button" id="m1-verify-counts-btn" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition-colors">
+                        Verify Counts
+                      </button>`
+                    : `<div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs sm:text-sm">
+                        <strong>✓ Correct!</strong> ${ch.countExplanation}
+                      </div>`
+                }
+                <div id="m1-count-feedback" class="hidden mt-3 p-3 rounded-xl text-xs sm:text-sm border"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Wire Mission 1 Events
+      container.querySelectorAll('[data-m1-tab]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          appState.m1.challengeIdx = Number(btn.dataset.m1Tab);
+          appState.m1.step = 'CLICK_RECORD';
+          appState.m1.selectedLines = new Set();
+          renderAll();
+        });
+      });
+
+      container.querySelectorAll('[data-m1-line]').forEach((row) => {
+        row.addEventListener('click', () => {
+          if (appState.m1.clickSolved[cIdx]) return;
+          const num = Number(row.dataset.m1Line);
+          if (appState.m1.selectedLines.has(num)) {
+            appState.m1.selectedLines.delete(num);
+          } else {
+            appState.m1.selectedLines.add(num);
+          }
+          renderAll();
+        });
+      });
+
+      const clearBtn = document.getElementById('m1-clear-lines-btn');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          appState.m1.selectedLines = new Set();
+          renderAll();
+        });
+      }
+
+      const checkDefsBtn = document.getElementById('m1-check-defs-btn');
+      if (checkDefsBtn) {
+        checkDefsBtn.addEventListener('click', () => {
+          const f = document.getElementById('m1-def-file').value;
+          const r = document.getElementById('m1-def-record').value;
+          const fld = document.getElementById('m1-def-field').value;
+          appState.m1.defAnswers = { file: f, record: r, field: fld };
+          const fb = document.getElementById('m1-def-feedback');
+
+          if (f === 'File' && r === 'Record' && fld === 'Field') {
+            appState.m1.defsMatched = true;
+            renderAll();
+          } else {
+            fb.className = 'mt-3 p-3 rounded-xl text-xs sm:text-sm border bg-rose-50 border-rose-200 text-rose-900';
+            fb.textContent = 'Not quite! Remember the hierarchy from largest to smallest: File (the whole unit) → Record (one complete person/topic) → Field (one specific piece of info on a line).';
+            fb.classList.remove('hidden');
+          }
+        });
+      }
+
+      const verifyLinesBtn = document.getElementById('m1-verify-lines-btn');
+      if (verifyLinesBtn) {
+        verifyLinesBtn.addEventListener('click', () => {
+          const target = appState.m1.step === 'CLICK_RECORD' ? ch.recordTargetLines : ch.fieldTargetLines;
+          const hint = appState.m1.step === 'CLICK_RECORD' ? ch.recordHint : ch.fieldHint;
+          const selectedArr = [...appState.m1.selectedLines].sort((a, b) => a - b);
+          const isMatch = selectedArr.length === target.length && selectedArr.every((v, i) => v === target[i]);
+          const fb = document.getElementById('m1-click-feedback');
+
+          if (isMatch) {
+            appState.m1.selectedLines = new Set();
+            if (appState.m1.step === 'CLICK_RECORD') {
+              appState.m1.step = 'CLICK_FIELD';
+              renderAll();
+            } else {
+              appState.m1.clickSolved[cIdx] = true;
+              renderAll();
+            }
+          } else {
+            fb.className = 'mt-3 p-3 rounded-xl text-xs sm:text-sm border bg-amber-50 border-amber-200 text-amber-950';
+            fb.textContent = `Check your line selection: ${hint}`;
+            fb.classList.remove('hidden');
+          }
+        });
+      }
+
+      const verifyCountsBtn = document.getElementById('m1-verify-counts-btn');
+      if (verifyCountsBtn) {
+        verifyCountsBtn.addEventListener('click', () => {
+          const fVal = Number(document.getElementById('m1-in-files').value);
+          const rVal = Number(document.getElementById('m1-in-records').value);
+          const fldVal = Number(document.getElementById('m1-in-fields').value);
+          const fb = document.getElementById('m1-count-feedback');
+
+          if (fVal === ch.filesCount && rVal === ch.recordsCount && fldVal === ch.fieldsCount) {
+            appState.m1.countsSolved[cIdx] = true;
+            renderAll();
+          } else {
+            let reason = `Remember: all lines are inside 1 File. Look at how many lines describe ONE single entry (that's the number of Fields = ${ch.fieldsCount}), and divide total lines (${ch.lines.length}) by ${ch.fieldsCount} to get the number of Records!`;
+            if (fldVal === ch.lines.length) {
+              reason = `Common trap! ${ch.lines.length} is the total number of lines in the file, NOT the number of Fields. Fields are the distinct pieces of info inside ONE record (${ch.fieldsCount} fields per record).`;
+            }
+            fb.className = 'mt-3 p-3 rounded-xl text-xs sm:text-sm border bg-rose-50 border-rose-200 text-rose-900';
+            fb.textContent = reason;
+            fb.classList.remove('hidden');
+          }
+        });
+      }
+    }
+
+    /**
+     * ==================== RENDER MISSION 2 ====================
+     */
+    function renderMission2(container) {
+      const sub = appState.m2.subTab;
+
+      container.innerHTML = `
+        <div class="space-y-5">
+          <!-- Sub-Mission Switcher -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" data-m2-sub="PATHS"
+              class="px-4 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold border transition-all ${
+                sub === 'PATHS'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              }">
+              ${appState.m2.pathSolved.every(Boolean) ? '✓ ' : '1. '}Challenge A: NetBeans Path Inspector
+            </button>
+
+            <button type="button" data-m2-sub="COMMANDS"
+              class="px-4 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold border transition-all ${
+                sub === 'COMMANDS'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              }">
+              ${appState.m2.commandsSolved ? '✓ ' : '2. '}Challenge B: Variable-Substitution Command Builder
+            </button>
+          </div>
+
+          ${
+            sub === 'PATHS'
+              ? `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                  ${M2_PATH_CHALLENGES.map((pc, pIdx) => {
+                    const solved = appState.m2.pathSolved[pIdx];
+                    const chosenIdx = appState.m2.pathSelected[pIdx];
+                    return `
+                      <div class="paper-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                        <div class="space-y-3">
+                          <div class="flex items-center justify-between gap-2">
+                            <span class="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-100 text-amber-900">NetBeans Path Audit #${pIdx + 1}</span>
+                            ${solved ? '<span class="text-xs font-mono font-bold text-emerald-700">✓ Fixed</span>' : ''}
+                          </div>
+                          <h3 class="font-bold text-slate-900 text-base">${pc.title}</h3>
+                          <p class="text-xs sm:text-sm text-slate-600">${pc.context}</p>
+
+                          <div class="p-3 rounded-xl bg-slate-950 border border-rose-500/40 font-mono text-xs text-rose-300 overflow-x-auto">
+                            <div class="text-[10px] uppercase tracking-wider text-rose-400 mb-1">✗ Broken Path Code:</div>
+                            ${pc.brokenCode}
+                          </div>
+
+                          <p class="text-sm font-semibold text-slate-900 pt-1">${pc.question}</p>
+
+                          <div class="space-y-2">
+                            ${pc.options.map((opt, oIdx) => {
+                              const isPicked = chosenIdx === oIdx;
+                              let cls = 'w-full p-3 rounded-xl border text-left font-mono text-xs transition-all ';
+                              if (solved && opt.correct) {
+                                cls += 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold';
+                              } else if (isPicked && !opt.correct) {
+                                cls += 'bg-rose-50 border-rose-400 text-rose-900';
+                              } else {
+                                cls += 'bg-white hover:bg-indigo-50/60 border-slate-300 text-slate-800';
+                              }
+                              return `<button type="button" data-m2-path="${pIdx}:${oIdx}" ${solved ? 'disabled' : ''} class="${cls}">${opt.code}</button>`;
+                            }).join('')}
+                          </div>
+                        </div>
+
+                        ${
+                          chosenIdx !== null
+                            ? `<div class="p-3 rounded-xl text-xs sm:text-sm border ${
+                                pc.options[chosenIdx].correct
+                                  ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                                  : 'bg-rose-50 border-rose-200 text-rose-900'
+                              }">${pc.options[chosenIdx].explanation}</div>`
+                            : ''
+                        }
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `
+              : `
+                <!-- Challenge B: Exact Test Review Q1 Variable-Substitution Command Builder -->
+                <div class="paper-card rounded-2xl p-5 sm:p-6 space-y-5">
+                  <div class="p-4 rounded-xl bg-slate-900 text-slate-100 border border-slate-800">
+                    <div class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 mb-1">
+                      Test Part 1 · Question 1 Simulation
+                    </div>
+                    <p class="text-sm text-slate-200 leading-relaxed">
+                      <code class="text-amber-300 font-mono">STUDENTS.txt</code> is located in the <code class="text-cyan-300 font-mono">src</code> folder of your project called <code class="text-cyan-300 font-mono">"TestReview"</code>. Use the exact variable names below:
+                    </p>
+                    <div class="mt-2.5 flex flex-wrap gap-2 font-mono text-xs">
+                      <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700"><strong class="text-rose-400">a</strong> = FileNotFoundException</span>
+                      <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700"><strong class="text-indigo-400">b</strong> = File variable</span>
+                      <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700"><strong class="text-emerald-400">c</strong> = Scanner variable</span>
+                      <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700"><strong class="text-amber-300">sName</strong> = String (1st field)</span>
+                      <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700"><strong class="text-cyan-300">sGrade / grade</strong> = String / int</span>
+                    </div>
+                  </div>
+
+                  <!-- 6 Java Command Completion Rows -->
+                  <div class="space-y-3 font-mono text-xs sm:text-sm">
+                    <!-- a) Declare & construct File b -->
+                    <div class="p-3.5 rounded-xl bg-paper-subtle border border-paper-border">
+                      <div class="font-sans text-xs font-bold text-slate-700 mb-1.5">a) Declare and construct the File variable <code class="text-indigo-700">b</code>:</div>
+                      <select id="m2-cmd-a" ${appState.m2.commandsSolved ? 'disabled' : ''} class="w-full p-2.5 rounded-lg border border-slate-300 bg-white text-slate-900">
+                        <option value="">-- Select Java Command --</option>
+                        <option value="ok" ${appState.m2.cmdAnswers.a === 'ok' ? 'selected' : ''}>File b = new File("src/testreview/STUDENTS.txt");</option>
+                        <option value="w1" ${appState.m2.cmdAnswers.a === 'w1' ? 'selected' : ''}>Scanner b = new File("src/testreview/STUDENTS.txt");</option>
+                        <option value="w2" ${appState.m2.cmdAnswers.a === 'w2' ? 'selected' : ''}>File file = new File("C:\\TestReview\\STUDENTS.txt");</option>
+                      </select>
+                    </div>
+
+                    <!-- b) Declare & construct Scanner c -->
+                    <div class="p-3.5 rounded-xl bg-paper-subtle border border-paper-border">
+                      <div class="font-sans text-xs font-bold text-slate-700 mb-1.5">b) Declare and construct the Scanner variable <code class="text-emerald-700">c</code> using File <code class="text-indigo-700">b</code>:</div>
+                      <select id="m2-cmd-b" ${appState.m2.commandsSolved ? 'disabled' : ''} class="w-full p-2.5 rounded-lg border border-slate-300 bg-white text-slate-900">
+                        <option value="">-- Select Java Command --</option>
+                        <option value="w1" ${appState.m2.cmdAnswers.b === 'w1' ? 'selected' : ''}>Scanner c = new Scanner(System.in);</option>
+                        <option value="ok" ${appState.m2.cmdAnswers.b === 'ok' ? 'selected' : ''}>Scanner c = new Scanner(b);</option>
+                        <option value="w2" ${appState.m2.cmdAnswers.b === 'w2' ? 'selected' : ''}>Scanner b = new Scanner(c);</option>
+                      </select>
+                    </div>
+
+                    <!-- c) Check if items remain -->
+                    <div class="p-3.5 rounded-xl bg-paper-subtle border border-paper-border">
+                      <div class="font-sans text-xs font-bold text-slate-700 mb-1.5">c) Loop while there are still lines left to read in Scanner <code class="text-emerald-700">c</code>:</div>
+                      <select id="m2-cmd-c" ${appState.m2.commandsSolved ? 'disabled' : ''} class="w-full p-2.5 rounded-lg border border-slate-300 bg-white text-slate-900">
+                        <option value="">-- Select Java Command --</option>
+                        <option value="w1" ${appState.m2.cmdAnswers.c === 'w1' ? 'selected' : ''}>if (b.hasNextLine())</option>
+                        <option value="ok" ${appState.m2.cmdAnswers.c === 'ok' ? 'selected' : ''}>while (c.hasNextLine())</option>
+                        <option value="w2" ${appState.m2.cmdAnswers.c === 'w2' ? 'selected' : ''}>while (c.nextLine())</option>
+                      </select>
+                    </div>
+
+                    <!-- d) Read first field sName & parse grade -->
+                    <div class="p-3.5 rounded-xl bg-paper-subtle border border-paper-border space-y-2">
+                      <div class="font-sans text-xs font-bold text-slate-700">d) Read the first field into <code class="text-amber-700">sName</code> and parse <code class="text-cyan-700">sGrade</code> into <code class="text-cyan-700">int grade</code>:</div>
+                      <select id="m2-cmd-d1" ${appState.m2.commandsSolved ? 'disabled' : ''} class="w-full p-2.5 rounded-lg border border-slate-300 bg-white text-slate-900">
+                        <option value="">-- Read sName from Scanner c --</option>
+                        <option value="ok" ${appState.m2.cmdAnswers.d1 === 'ok' ? 'selected' : ''}>sName = c.nextLine();</option>
+                        <option value="w1" ${appState.m2.cmdAnswers.d1 === 'w1' ? 'selected' : ''}>sName = b.nextLine();</option>
+                        <option value="w2" ${appState.m2.cmdAnswers.d1 === 'w2' ? 'selected' : ''}>sName = c.hasNextLine();</option>
+                      </select>
+                      <select id="m2-cmd-d2" ${appState.m2.commandsSolved ? 'disabled' : ''} class="w-full p-2.5 rounded-lg border border-slate-300 bg-white text-slate-900">
+                        <option value="">-- Parse String sGrade into int grade --</option>
+                        <option value="w1" ${appState.m2.cmdAnswers.d2 === 'w1' ? 'selected' : ''}>grade = Double.parseDouble(sGrade);</option>
+                        <option value="ok" ${appState.m2.cmdAnswers.d2 === 'ok' ? 'selected' : ''}>grade = Integer.parseInt(sGrade);</option>
+                        <option value="w2" ${appState.m2.cmdAnswers.d2 === 'w2' ? 'selected' : ''}>grade = (int) sGrade;</option>
+                      </select>
+                    </div>
+
+                    <!-- e) Catch FileNotFoundException a -->
+                    <div class="p-3.5 rounded-xl bg-paper-subtle border border-paper-border">
+                      <div class="font-sans text-xs font-bold text-slate-700 mb-1.5">e) Catch the file-not-found exception using variable <code class="text-rose-700">a</code>:</div>
+                      <select id="m2-cmd-e" ${appState.m2.commandsSolved ? 'disabled' : ''} class="w-full p-2.5 rounded-lg border border-slate-300 bg-white text-slate-900">
+                        <option value="">-- Select Catch Clause --</option>
+                        <option value="w1" ${appState.m2.cmdAnswers.e === 'w1' ? 'selected' : ''}>} catch (FileNotFoundException e) {</option>
+                        <option value="ok" ${appState.m2.cmdAnswers.e === 'ok' ? 'selected' : ''}>} catch (FileNotFoundException a) {</option>
+                        <option value="w2" ${appState.m2.cmdAnswers.e === 'w2' ? 'selected' : ''}>} try (FileNotFoundException a) {</option>
+                      </select>
+                    </div>
+
+                    <!-- f) Display caught error a -->
+                    <div class="p-3.5 rounded-xl bg-paper-subtle border border-paper-border">
+                      <div class="font-sans text-xs font-bold text-slate-700 mb-1.5">f) Display the words of the caught error <code class="text-rose-700">a</code>:</div>
+                      <select id="m2-cmd-f" ${appState.m2.commandsSolved ? 'disabled' : ''} class="w-full p-2.5 rounded-lg border border-slate-300 bg-white text-slate-900">
+                        <option value="">-- Select Print Statement --</option>
+                        <option value="ok" ${appState.m2.cmdAnswers.f === 'ok' ? 'selected' : ''}>System.out.println("Error: " + a);</option>
+                        <option value="w1" ${appState.m2.cmdAnswers.f === 'w1' ? 'selected' : ''}>System.out.println("Error: " + e);</option>
+                        <option value="w2" ${appState.m2.cmdAnswers.f === 'w2' ? 'selected' : ''}>System.out.println("Error: a");</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  ${
+                    !appState.m2.commandsSolved
+                      ? `<button type="button" id="m2-verify-cmds-btn" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold shadow-md transition-colors">
+                          Verify All 6 Java Commands
+                        </button>`
+                      : `<div class="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 text-sm">
+                          <strong>✓ All 6 NetBeans File &amp; Scanner Commands Verified!</strong> You substituted variables <code class="font-mono font-bold">a</code>, <code class="font-mono font-bold">b</code>, <code class="font-mono font-bold">c</code>, and <code class="font-mono font-bold">sName</code> with 100% accuracy.
+                        </div>`
+                  }
+                  <div id="m2-cmd-feedback" class="hidden p-3.5 rounded-xl text-xs sm:text-sm border"></div>
+                </div>
+              `
+          }
+        </div>
+      `;
+
+      // Wire Mission 2 Events
+      container.querySelectorAll('[data-m2-sub]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          appState.m2.subTab = btn.dataset.m2Sub;
+          renderAll();
+        });
+      });
+
+      container.querySelectorAll('[data-m2-path]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const [pIdxStr, oIdxStr] = btn.dataset.m2Path.split(':');
+          const pIdx = Number(pIdxStr);
+          const oIdx = Number(oIdxStr);
+          appState.m2.pathSelected[pIdx] = oIdx;
+          if (M2_PATH_CHALLENGES[pIdx].options[oIdx].correct) {
+            appState.m2.pathSolved[pIdx] = true;
+          }
+          renderAll();
+        });
+      });
+
+      const verifyCmdsBtn = document.getElementById('m2-verify-cmds-btn');
+      if (verifyCmdsBtn) {
+        verifyCmdsBtn.addEventListener('click', () => {
+          const ans = {
+            a: document.getElementById('m2-cmd-a').value,
+            b: document.getElementById('m2-cmd-b').value,
+            c: document.getElementById('m2-cmd-c').value,
+            d1: document.getElementById('m2-cmd-d1').value,
+            d2: document.getElementById('m2-cmd-d2').value,
+            e: document.getElementById('m2-cmd-e').value,
+            f: document.getElementById('m2-cmd-f').value
+          };
+          appState.m2.cmdAnswers = ans;
+
+          const allOk = Object.values(ans).every((v) => v === 'ok');
+          const fb = document.getElementById('m2-cmd-feedback');
+
+          if (allOk) {
+            appState.m2.commandsSolved = true;
+            renderAll();
+          } else {
+            fb.className = 'p-3.5 rounded-xl text-xs sm:text-sm border bg-rose-50 border-rose-200 text-rose-900';
+            fb.innerHTML = '<strong>Check your variable names!</strong> Remember: <code class="font-mono">b</code> is the File, <code class="font-mono">c</code> is the Scanner (so use <code class="font-mono">c.hasNextLine()</code> and <code class="font-mono">c.nextLine()</code>), and <code class="font-mono">a</code> is the FileNotFoundException variable.';
+            fb.classList.remove('hidden');
+          }
+        });
+      }
+    }
+
+    /**
+     * ==================== RENDER MISSION 3 ====================
+     */
+    function renderMission3(container) {
+      const cIdx = appState.m3.caseIdx;
+      const cs = M3_CASES[cIdx];
+      const sIdx = appState.m3.stepIdx[cIdx];
+      const stepObj = cs.trace[sIdx];
+      const isPredDone = appState.m3.predicted[cIdx];
+
+      container.innerHTML = `
+        <div class="space-y-5">
+          <!-- Case Switcher Tabs -->
+          <div class="flex flex-wrap items-center gap-2">
+            ${M3_CASES.map((item, idx) => {
+              const done = appState.m3.predicted[idx] && appState.m3.tracedComplete[idx];
+              const active = idx === cIdx;
+              return `
+                <button type="button" data-m3-case="${idx}"
+                  class="px-3.5 py-2 rounded-xl font-mono text-xs font-bold border transition-all ${
+                    active
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                      : done
+                      ? 'bg-emerald-50 border-emerald-400 text-emerald-900'
+                      : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                  }">
+                  ${done ? '✓ ' : ''}${item.title}
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Split-Screen Simulator -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            <!-- Left Panel: Raw .txt File with Glowing FILE POINTER & Memory Watch Table -->
+            <div class="lg:col-span-5 space-y-4">
+              <!-- Data File Pointer Card -->
+              <div class="rounded-2xl bg-slate-900 text-slate-100 border border-slate-800 shadow-xl overflow-hidden">
+                <div class="px-4 py-2.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-mono text-xs sm:text-sm font-bold text-white">${cs.fileName}</span>
+                  </div>
+                  <span class="font-mono text-[11px] text-emerald-400">
+                    ${stepObj.pointer >= cs.fileLines.length ? 'EOF (End of File)' : `Next Line: #${stepObj.pointer + 1}`}
+                  </span>
+                </div>
+
+                <div class="p-3 font-mono text-xs sm:text-sm space-y-1.5">
+                  ${cs.fileLines.map((lineVal, idx) => {
+                    const isConsumed = idx < stepObj.consumed;
+                    const isNextPointer = idx === stepObj.pointer;
+                    return `
+                      <div class="flex items-center justify-between px-3 py-2 rounded-xl border transition-all ${
+                        isNextPointer
+                          ? 'bg-emerald-500/15 border-emerald-400 text-white scanner-pointer-glow'
+                          : isConsumed
+                          ? 'bg-slate-950/70 border-slate-800/80 text-slate-500 line-through'
+                          : 'bg-slate-800/60 border-slate-700/70 text-slate-200'
+                      }">
+                        <div class="flex items-center gap-2.5">
+                          <span class="text-xs text-slate-500">${idx + 1}</span>
+                          <span class="font-semibold">${lineVal}</span>
+                        </div>
+                        ${
+                          isNextPointer
+                            ? '<span class="px-2 py-0.5 rounded bg-emerald-400 text-slate-950 text-[10px] font-extrabold">▶ FILE POINTER</span>'
+                            : isConsumed
+                            ? '<span class="text-[10px] text-slate-500">CONSUMED</span>'
+                            : '<span class="text-[10px] text-slate-400">UNREAD</span>'
+                        }
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+
+              <!-- Live Memory Watch Table -->
+              <div class="paper-card rounded-2xl p-4">
+                <div class="flex items-center justify-between mb-2.5">
+                  <h4 class="font-mono text-xs font-extrabold uppercase tracking-wider text-slate-800">
+                    Live Java Memory Watch Table
+                  </h4>
+                  <span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 font-mono text-[11px] font-bold">
+                    Record #${stepObj.recordNum}
+                  </span>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                  <table class="w-full text-left font-mono text-xs">
+                    <thead class="bg-slate-100 text-slate-600 border-b border-slate-200">
+                      <tr>
+                        <th class="px-3 py-2">Variable</th>
+                        <th class="px-3 py-2">Current Value in RAM</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white">
+                      ${Object.entries(stepObj.vars).map(([k, v]) => `
+                        <tr>
+                          <td class="px-3 py-2 font-bold text-indigo-700">${k}</td>
+                          <td class="px-3 py-2 text-slate-900 font-semibold">${v}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Panel: Prediction Gate + Syntax-Highlighted Java IDE & Console -->
+            <div class="lg:col-span-7 space-y-4">
+              <!-- Step 1: Prediction Challenge -->
+              <div class="paper-card rounded-2xl p-4 sm:p-5">
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <span class="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-100 text-amber-900">
+                    Step 1 · Predict Loop Outcome
+                  </span>
+                  ${isPredDone ? '<span class="text-xs font-mono font-bold text-emerald-700">✓ Predicted</span>' : ''}
+                </div>
+                <p class="text-sm font-semibold text-slate-900 mb-3">${cs.question}</p>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  ${cs.options.map((opt, oIdx) => {
+                    const picked = appState.m3.selectedPred[cIdx] === oIdx;
+                    let cls = 'p-2.5 rounded-xl border font-mono text-sm font-bold text-center transition-all ';
+                    if (isPredDone && oIdx === cs.correctIdx) {
+                      cls += 'bg-emerald-50 border-emerald-500 text-emerald-900';
+                    } else if (picked && oIdx !== cs.correctIdx) {
+                      cls += 'bg-rose-50 border-rose-400 text-rose-900';
+                    } else {
+                      cls += 'bg-white hover:bg-indigo-50 border-slate-300 text-slate-800';
+                    }
+                    return `<button type="button" data-m3-pred="${oIdx}" ${isPredDone ? 'disabled' : ''} class="${cls}">${opt}</button>`;
+                  }).join('')}
+                </div>
+
+                ${
+                  appState.m3.selectedPred[cIdx] !== null
+                    ? `<div class="mt-3 p-3 rounded-xl text-xs sm:text-sm border ${
+                        isPredDone
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                          : 'bg-rose-50 border-rose-200 text-rose-900'
+                      }">
+                        ${isPredDone ? `✓ ${cs.predExplanation}` : 'Not quite — check the values in data.txt on the left and calculate again!'}
+                      </div>`
+                    : ''
+                }
+              </div>
+
+              <!-- Step 2: Java Code Trace & Stepper Controls -->
+              <div class="rounded-2xl bg-slate-900 text-slate-100 border border-slate-800 shadow-xl overflow-hidden">
+                <div class="px-4 py-2.5 bg-slate-950 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-slate-200">☕ ${cs.javaFileName}</span>
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" id="m3-step-line-btn" ${!isPredDone || sIdx >= cs.trace.length - 1 ? 'disabled' : ''}
+                      class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-slate-950 font-mono text-xs font-extrabold transition-colors">
+                      Step Scanner Line →
+                    </button>
+                    <button type="button" id="m3-step-rec-btn" ${!isPredDone || sIdx >= cs.trace.length - 1 ? 'disabled' : ''}
+                      class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-mono text-xs font-bold transition-colors">
+                      Step Full Record ⏭
+                    </button>
+                    <button type="button" id="m3-reset-btn"
+                      class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs">
+                      Reset
+                    </button>
+                  </div>
+                </div>
+
+                ${
+                  !isPredDone
+                    ? `<div class="px-4 py-2 bg-amber-500/15 border-b border-amber-500/30 text-amber-200 text-xs font-mono">
+                        🔒 Answer Step 1 (Predict Loop Outcome) above to unlock the Scanner step-through controls!
+                      </div>`
+                    : `<div class="px-4 py-2.5 bg-indigo-950/80 border-b border-indigo-500/30 text-indigo-100 text-xs sm:text-sm flex items-start gap-2">
+                        <span class="text-emerald-400 font-mono font-bold">▶</span>
+                        <span>${stepObj.note}</span>
+                      </div>`
+                }
+
+                <div class="py-2.5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto">
+                  ${cs.code.map((lineStr, idx) => {
+                    const lineNum = idx + 1;
+                    const isExec = lineNum === stepObj.line;
+                    return `
+                      <div class="flex items-center px-3 py-0.5 border-l-4 ${
+                        isExec ? 'bg-emerald-500/15 border-emerald-400' : 'border-transparent'
+                      }">
+                        <span class="w-4 text-emerald-400 font-bold shrink-0">${isExec ? '▶' : ''}</span>
+                        <span class="w-5 text-right text-slate-500 mr-3 shrink-0">${lineNum}</span>
+                        <code class="whitespace-pre text-slate-200">${highlightJava(lineStr)}</code>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+
+                <!-- Console Output Box -->
+                <div class="p-3.5 bg-slate-950 border-t border-slate-800 font-mono text-xs">
+                  <div class="text-slate-400 uppercase tracking-wider text-[10px] mb-1">Java Console Output (System.out):</div>
+                  <pre class="text-emerald-300 whitespace-pre-wrap leading-relaxed">${stepObj.output}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Wire Mission 3 Events
+      container.querySelectorAll('[data-m3-case]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          appState.m3.caseIdx = Number(btn.dataset.m3Case);
+          renderAll();
+        });
+      });
+
+      container.querySelectorAll('[data-m3-pred]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const oIdx = Number(btn.dataset.m3Pred);
+          appState.m3.selectedPred[cIdx] = oIdx;
+          if (oIdx === cs.correctIdx) {
+            appState.m3.predicted[cIdx] = true;
+          }
+          renderAll();
+        });
+      });
+
+      const stepLineBtn = document.getElementById('m3-step-line-btn');
+      if (stepLineBtn) {
+        stepLineBtn.addEventListener('click', () => {
+          if (appState.m3.stepIdx[cIdx] < cs.trace.length - 1) {
+            appState.m3.stepIdx[cIdx]++;
+            if (appState.m3.stepIdx[cIdx] === cs.trace.length - 1) {
+              appState.m3.tracedComplete[cIdx] = true;
+            }
+            renderAll();
+          }
+        });
+      }
+
+      const stepRecBtn = document.getElementById('m3-step-rec-btn');
+      if (stepRecBtn) {
+        stepRecBtn.addEventListener('click', () => {
+          const curRec = cs.trace[appState.m3.stepIdx[cIdx]].recordNum;
+          let nextIdx = appState.m3.stepIdx[cIdx] + 1;
+          while (nextIdx < cs.trace.length - 1 && cs.trace[nextIdx].recordNum === curRec) {
+            nextIdx++;
+          }
+          appState.m3.stepIdx[cIdx] = nextIdx;
+          if (nextIdx === cs.trace.length - 1) {
+            appState.m3.tracedComplete[cIdx] = true;
+          }
+          renderAll();
+        });
+      }
+
+      const resetBtn = document.getElementById('m3-reset-btn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          appState.m3.stepIdx[cIdx] = 0;
+          renderAll();
+        });
+      }
+    }
+
+    /**
+     * ==================== RENDER MISSION 4 ====================
+     */
+    function renderMission4(container) {
+      const bIdx = appState.m4.bugIdx;
+      const bug = M4_BUGS[bIdx];
+      const hasRun = appState.m4.bugRunTriggered[bIdx];
+      const isSolved = appState.m4.bugsSolved[bIdx];
+      const chosen = appState.m4.fixedSelected[bIdx];
+
+      container.innerHTML = `
+        <div class="space-y-5">
+          <!-- Bug Selector Tabs -->
+          <div class="flex flex-wrap items-center gap-2">
+            ${M4_BUGS.map((item, idx) => {
+              const done = appState.m4.bugsSolved[idx];
+              const active = idx === bIdx;
+              return `
+                <button type="button" data-m4-tab="${idx}"
+                  class="px-3.5 py-2 rounded-xl font-mono text-xs font-bold border transition-all ${
+                    active
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                      : done
+                      ? 'bg-emerald-50 border-emerald-400 text-emerald-900'
+                      : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                  }">
+                  ${done ? '✓ ' : '🐞 '}Bug #${idx + 1}: ${item.title.replace(/^Bug #\d+:\s*/, '')}
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            <!-- Left: Broken Java Code & Interactive Test Run Console -->
+            <div class="lg:col-span-6 space-y-4">
+              <div class="rounded-2xl bg-slate-900 text-slate-100 border border-slate-800 shadow-xl overflow-hidden">
+                <div class="px-4 py-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between gap-2">
+                  <span class="font-mono text-xs font-bold text-rose-400">🐞 Broken ICS3U Snippet</span>
+                  <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[11px]">${bug.sourceTag}</span>
+                </div>
+
+                <div class="p-4 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto">
+                  ${bug.buggyCode.map((line, i) => `
+                    <div class="flex items-center py-0.5">
+                      <span class="w-5 text-right text-slate-500 mr-3 select-none">${i + 1}</span>
+                      <code class="whitespace-pre text-slate-200">${highlightJava(line)}</code>
+                    </div>
+                  `).join('')}
+                </div>
+
+                <div class="px-4 py-3 bg-slate-950 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                  <button type="button" id="m4-run-bug-btn"
+                    class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-mono text-xs font-extrabold transition-colors">
+                    ▶ Run Test Simulation
+                  </button>
+                  <span class="text-xs font-mono text-slate-400">Compare Buggy vs. Expected Output</span>
+                </div>
+              </div>
+
+              <!-- Output Comparison Box -->
+              ${
+                hasRun || isSolved
+                  ? `
+                    <div class="paper-card rounded-2xl p-4 space-y-3 font-mono text-xs">
+                      <div class="p-3 rounded-xl bg-rose-950 text-rose-200 border border-rose-500/40">
+                        <div class="text-[10px] uppercase tracking-wider text-rose-400 font-bold mb-1">✗ Buggy Program Output:</div>
+                        <pre class="whitespace-pre-wrap">${bug.buggyOutput}</pre>
+                      </div>
+
+                      ${
+                        isSolved
+                          ? `<div class="p-3 rounded-xl bg-emerald-950 text-emerald-200 border border-emerald-500/40">
+                              <div class="text-[10px] uppercase tracking-wider text-emerald-400 font-bold mb-1">✓ Patched Program Output:</div>
+                              <pre class="whitespace-pre-wrap">${bug.fixedOutput}</pre>
+                            </div>`
+                          : ''
+                      }
+                    </div>
+                  `
+                  : ''
+              }
+            </div>
+
+            <!-- Right: Diagnosis & Patch Selection -->
+            <div class="lg:col-span-6 paper-card rounded-2xl p-5 space-y-4">
+              <div>
+                <h3 class="text-lg font-extrabold text-slate-900">${bug.title}</h3>
+                <p class="text-sm text-slate-600 mt-1 leading-relaxed">${bug.scenario}</p>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs sm:text-sm text-amber-950">
+                <strong>Why does this happen?</strong> ${bug.bugExplanation}
+              </div>
+
+              <div>
+                <p class="text-sm font-bold text-slate-900 mb-2.5">${bug.question}</p>
+                <div class="space-y-2.5">
+                  ${bug.options.map((opt, oIdx) => {
+                    const isPicked = chosen === oIdx;
+                    let cls = 'w-full p-3.5 rounded-xl border text-left font-mono text-xs sm:text-sm transition-all ';
+                    if (isSolved && opt.correct) {
+                      cls += 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold';
+                    } else if (isPicked && !opt.correct) {
+                      cls += 'bg-rose-50 border-rose-400 text-rose-900';
+                    } else {
+                      cls += 'bg-white hover:bg-indigo-50/70 border-slate-300 text-slate-800';
+                    }
+                    return `<button type="button" data-m4-opt="${oIdx}" ${isSolved ? 'disabled' : ''} class="${cls}">${opt.label}</button>`;
+                  }).join('')}
+                </div>
+              </div>
+
+              ${
+                chosen !== null
+                  ? `<div class="p-3.5 rounded-xl text-xs sm:text-sm border ${
+                      bug.options[chosen].correct
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                        : 'bg-rose-50 border-rose-200 text-rose-900'
+                    }">${bug.options[chosen].feedback}</div>`
+                  : ''
+              }
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Wire Mission 4 Events
+      container.querySelectorAll('[data-m4-tab]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          appState.m4.bugIdx = Number(btn.dataset.m4Tab);
+          renderAll();
+        });
+      });
+
+      const runBtn = document.getElementById('m4-run-bug-btn');
+      if (runBtn) {
+        runBtn.addEventListener('click', () => {
+          appState.m4.bugRunTriggered[bIdx] = true;
+          renderAll();
+        });
+      }
+
+      container.querySelectorAll('[data-m4-opt]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const oIdx = Number(btn.dataset.m4Opt);
+          appState.m4.fixedSelected[bIdx] = oIdx;
+          appState.m4.bugRunTriggered[bIdx] = true;
+          if (bug.options[oIdx].correct) {
+            appState.m4.bugsSolved[bIdx] = true;
+          }
+          renderAll();
+        });
+      });
+    }
+
+    /**
+     * ==================== RENDER MISSION 5 ====================
+     */
+    function renderMission5(container) {
+      const mode = appState.m5.mode;
+      const weights = [128, 64, 32, 16, 8, 4, 2, 1];
+
+      if (mode === 'BINARY') {
+        const curProb = appState.m5.customBin || M5_BINARY_PROBLEMS[appState.m5.binIdx];
+        const isCustom = Boolean(appState.m5.customBin);
+        const solved = !isCustom && appState.m5.binSolved[appState.m5.binIdx];
+        const sandboxSum = appState.m5.sandboxBits.reduce((acc, bit, idx) => acc + bit * weights[idx], 0);
+
+        container.innerHTML = `
+          <div class="space-y-5">
+            <!-- Mode Switcher: Binary vs Hex -->
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <button type="button" data-m5-mode="BINARY"
+                  class="px-4 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold bg-slate-900 text-white border border-slate-900 shadow-sm">
+                  1. Binary → Decimal (${appState.m5.binSolved.filter(Boolean).length}/4 Test Qs)
+                </button>
+                <button type="button" data-m5-mode="HEX"
+                  class="px-4 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-300 hover:bg-slate-50">
+                  2. Hexadecimal → Decimal (${appState.m5.hexSolved.filter(Boolean).length}/4 Test Qs)
+                </button>
+              </div>
+              <span class="text-xs font-mono text-slate-600">Tip: Open the 4-Function Calc in the top bar anytime!</span>
+            </div>
+
+            <!-- Interactive 8-Bit Binary Place-Value Board -->
+            <div class="rounded-2xl bg-slate-900 text-white p-5 border border-slate-800 shadow-xl space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+                    Interactive Place-Value Scratchpad
+                  </span>
+                  <h3 class="text-base sm:text-lg font-bold mt-1">Click Bit Cards Below to Map Out Any 8-Bit Binary Number</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" id="m5-load-target-bits" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-mono font-bold">
+                    Load ${curProb.binary} onto Board
+                  </button>
+                  <button type="button" id="m5-clear-bits" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-300">
+                    Clear Board
+                  </button>
+                </div>
+              </div>
+
+              <!-- 8 Bit Columns -->
+              <div class="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                ${weights.map((w, idx) => {
+                  const bit = appState.m5.sandboxBits[idx];
+                  return `
+                    <button type="button" data-m5-bit="${idx}"
+                      class="p-3 rounded-xl border text-center font-mono transition-all ${
+                        bit === 1
+                          ? 'bg-emerald-500/20 border-emerald-400 text-white shadow-md'
+                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-600'
+                      }">
+                      <div class="text-[11px] text-slate-400">2<sup>${7 - idx}</sup></div>
+                      <div class="text-xs font-bold ${bit === 1 ? 'text-emerald-300' : 'text-slate-500'}">${w}</div>
+                      <div class="mt-2 py-1 rounded-lg text-lg font-extrabold ${
+                        bit === 1 ? 'bg-emerald-400 text-slate-950' : 'bg-slate-800 text-slate-300'
+                      }">${bit}</div>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+
+              <!-- Live Place-Value Sum Equation -->
+              <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs sm:text-sm flex flex-wrap items-center justify-between gap-2">
+                <div class="text-slate-300">
+                  Active Place Values:
+                  <span class="text-emerald-400 font-bold">
+                    ${
+                      weights.filter((_, i) => appState.m5.sandboxBits[i] === 1).join(' + ') || '0'
+                    }
+                  </span>
+                </div>
+                <div class="text-amber-300 font-extrabold text-base">
+                  Board Decimal Sum = ${sandboxSum}
+                </div>
+              </div>
+            </div>
+
+            <!-- Challenge Card -->
+            <div class="paper-card rounded-2xl p-5 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  ${M5_BINARY_PROBLEMS.map((p, idx) => `
+                    <button type="button" data-m5-bin-q="${idx}"
+                      class="px-3 py-1.5 rounded-lg font-mono text-xs font-bold border ${
+                        !isCustom && appState.m5.binIdx === idx
+                          ? 'bg-indigo-600 border-indigo-500 text-white'
+                          : appState.m5.binSolved[idx]
+                          ? 'bg-emerald-50 border-emerald-400 text-emerald-900'
+                          : 'bg-white border-slate-300 text-slate-700'
+                      }">
+                      ${appState.m5.binSolved[idx] ? '✓ ' : ''}${p.label} (${p.binary})
+                    </button>
+                  `).join('')}
+                </div>
+                <button type="button" id="m5-gen-bin-btn" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-mono text-xs font-bold">
+                  🎲 New Practice Binary
+                </button>
+              </div>
+
+              <div class="p-4 rounded-xl bg-paper-subtle border border-paper-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span class="text-xs font-mono uppercase font-bold text-indigo-700">${curProb.label} · Convert Binary to Base-10 Decimal</span>
+                  <div class="font-mono text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-wider mt-1">
+                    ${curProb.binary}<sub>2</sub> = ?<sub>10</sub>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <input id="m5-bin-input" type="number" placeholder="Decimal" value="${solved ? curProb.decimal : ''}" ${solved ? 'disabled' : ''}
+                    class="w-36 px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-mono text-base font-bold text-slate-900" />
+                  <button type="button" id="m5-check-bin-btn" ${solved ? 'disabled' : ''}
+                    class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-sm transition-colors">
+                    Check
+                  </button>
+                </div>
+              </div>
+
+              ${
+                solved
+                  ? `<div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm">
+                      <strong>✓ Correct!</strong> ${curProb.binary}<sub>2</sub> = <strong>${curProb.decimal}</strong> (${curProb.hint}).
+                    </div>`
+                  : ''
+              }
+              <div id="m5-bin-feedback" class="hidden p-3.5 rounded-xl text-xs sm:text-sm border"></div>
+            </div>
+          </div>
+        `;
+
+        // Wire Binary Events
+        container.querySelectorAll('[data-m5-mode]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            appState.m5.mode = btn.dataset.m5Mode;
+            renderAll();
+          });
+        });
+
+        container.querySelectorAll('[data-m5-bit]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const idx = Number(btn.dataset.m5Bit);
+            appState.m5.sandboxBits[idx] = appState.m5.sandboxBits[idx] === 1 ? 0 : 1;
+            renderAll();
+          });
+        });
+
+        document.getElementById('m5-load-target-bits').addEventListener('click', () => {
+          const padded = curProb.binary.padStart(8, '0');
+          appState.m5.sandboxBits = padded.split('').map((c) => (c === '1' ? 1 : 0));
+          renderAll();
+        });
+
+        document.getElementById('m5-clear-bits').addEventListener('click', () => {
+          appState.m5.sandboxBits = [0, 0, 0, 0, 0, 0, 0, 0];
+          renderAll();
+        });
+
+        container.querySelectorAll('[data-m5-bin-q]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            appState.m5.customBin = null;
+            appState.m5.binIdx = Number(btn.dataset.m5BinQ);
+            renderAll();
+          });
+        });
+
+        document.getElementById('m5-gen-bin-btn').addEventListener('click', () => {
+          const randDec = Math.floor(Math.random() * 240) + 15;
+          const randBin = randDec.toString(2);
+          appState.m5.customBin = {
+            label: 'Bonus Practice',
+            binary: randBin,
+            decimal: randDec,
+            hint: `Sum the active powers of 2 for ${randBin}`
+          };
+          renderAll();
+        });
+
+        const checkBinBtn = document.getElementById('m5-check-bin-btn');
+        if (checkBinBtn) {
+          checkBinBtn.addEventListener('click', () => {
+            const val = Number(document.getElementById('m5-bin-input').value);
+            const fb = document.getElementById('m5-bin-feedback');
+            if (val === curProb.decimal) {
+              if (!isCustom) {
+                appState.m5.binSolved[appState.m5.binIdx] = true;
+                renderAll();
+              } else {
+                fb.className = 'p-3.5 rounded-xl text-xs sm:text-sm border bg-emerald-50 border-emerald-200 text-emerald-900';
+                fb.textContent = `✓ Spot on! ${curProb.binary} in binary equals ${curProb.decimal} in decimal!`;
+                fb.classList.remove('hidden');
+              }
+            } else {
+              fb.className = 'p-3.5 rounded-xl text-xs sm:text-sm border bg-rose-50 border-rose-200 text-rose-900';
+              fb.textContent = `Not quite! Click "Load ${curProb.binary} onto Board" above to see which place-value columns (128, 64, 32, 16, 8, 4, 2, 1) have a 1.`;
+              fb.classList.remove('hidden');
+            }
+          });
+        }
+      } else {
+        // HEXADECIMAL MODE
+        const curHex = appState.m5.customHex || M5_HEX_PROBLEMS[appState.m5.hexIdx];
+        const isCustomHex = Boolean(appState.m5.customHex);
+        const solvedHex = !isCustomHex && appState.m5.hexSolved[appState.m5.hexIdx];
+        const digits = curHex.hex.split('');
+        const hexPlaces = digits.map((_, idx) => Math.pow(16, digits.length - 1 - idx));
+
+        container.innerHTML = `
+          <div class="space-y-5">
+            <!-- Mode Switcher -->
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <button type="button" data-m5-mode="BINARY"
+                  class="px-4 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-300 hover:bg-slate-50">
+                  1. Binary → Decimal (${appState.m5.binSolved.filter(Boolean).length}/4 Test Qs)
+                </button>
+                <button type="button" data-m5-mode="HEX"
+                  class="px-4 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold bg-slate-900 text-white border border-slate-900 shadow-sm">
+                  2. Hexadecimal → Decimal (${appState.m5.hexSolved.filter(Boolean).length}/4 Test Qs)
+                </button>
+              </div>
+              <span class="text-xs font-mono text-slate-600">Use your 4-Function Calculator to multiply &amp; add!</span>
+            </div>
+
+            <!-- Hex Digit Decoder Reference Strip -->
+            <div class="rounded-2xl bg-slate-900 text-white p-4 sm:p-5 border border-slate-800 shadow-xl space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="font-mono text-xs font-bold uppercase tracking-wider text-amber-400">
+                  Hexadecimal Digit Decoder (Base-16)
+                </span>
+                <span class="font-mono text-xs text-slate-400">Place Values: ×256 | ×16 | ×1</span>
+              </div>
+
+              <div class="grid grid-cols-6 gap-2 font-mono text-center">
+                ${[
+                  ['A', 10],
+                  ['B', 11],
+                  ['C', 12],
+                  ['D', 13],
+                  ['E', 14],
+                  ['F', 15]
+                ].map(([ch, val]) => `
+                  <div class="p-2 rounded-xl bg-slate-950 border border-slate-800">
+                    <div class="text-sm font-extrabold text-indigo-400">${ch}</div>
+                    <div class="text-xs text-emerald-400 font-bold">= ${val}</div>
+                  </div>
+                `).join('')}
+              </div>
+
+              <!-- Interactive Place-Value Breakdown for Active Hex Number -->
+              <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+                <div class="text-xs font-mono text-slate-400 mb-2">
+                  Place-Value Column Breakdown for <strong class="text-white">${curHex.hex}<sub>16</sub></strong>:
+                </div>
+                <div class="grid grid-cols-${digits.length} gap-3 font-mono text-center">
+                  ${digits.map((d, idx) => {
+                    const decDigit = parseInt(d, 16);
+                    const placeVal = hexPlaces[idx];
+                    return `
+                      <div class="p-3 rounded-xl bg-slate-900 border border-indigo-500/30">
+                        <div class="text-[11px] text-slate-400">16<sup>${digits.length - 1 - idx}</sup> Column (×${placeVal})</div>
+                        <div class="text-xl font-extrabold text-amber-300 mt-1">${d} <span class="text-xs text-slate-400">(${decDigit})</span></div>
+                        <div class="mt-1.5 text-xs text-emerald-300 font-bold">${decDigit} × ${placeVal} = ?</div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- Hex Challenge Card -->
+            <div class="paper-card rounded-2xl p-5 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  ${M5_HEX_PROBLEMS.map((p, idx) => `
+                    <button type="button" data-m5-hex-q="${idx}"
+                      class="px-3 py-1.5 rounded-lg font-mono text-xs font-bold border ${
+                        !isCustomHex && appState.m5.hexIdx === idx
+                          ? 'bg-indigo-600 border-indigo-500 text-white'
+                          : appState.m5.hexSolved[idx]
+                          ? 'bg-emerald-50 border-emerald-400 text-emerald-900'
+                          : 'bg-white border-slate-300 text-slate-700'
+                      }">
+                      ${appState.m5.hexSolved[idx] ? '✓ ' : ''}${p.label} (${p.hex})
+                    </button>
+                  `).join('')}
+                </div>
+                <button type="button" id="m5-gen-hex-btn" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-mono text-xs font-bold">
+                  🎲 New Practice Hex
+                </button>
+              </div>
+
+              <div class="p-4 rounded-xl bg-paper-subtle border border-paper-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span class="text-xs font-mono uppercase font-bold text-indigo-700">${curHex.label} · Convert Hexadecimal to Base-10 Decimal</span>
+                  <div class="font-mono text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-wider mt-1">
+                    ${curHex.hex}<sub>16</sub> = ?<sub>10</sub>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <input id="m5-hex-input" type="number" placeholder="Decimal" value="${solvedHex ? curHex.decimal : ''}" ${solvedHex ? 'disabled' : ''}
+                    class="w-36 px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-mono text-base font-bold text-slate-900" />
+                  <button type="button" id="m5-check-hex-btn" ${solvedHex ? 'disabled' : ''}
+                    class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-sm transition-colors">
+                    Check
+                  </button>
+                </div>
+              </div>
+
+              ${
+                solvedHex
+                  ? `<div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm">
+                      <strong>✓ Correct!</strong> ${curHex.hint}.
+                    </div>`
+                  : ''
+              }
+              <div id="m5-hex-feedback" class="hidden p-3.5 rounded-xl text-xs sm:text-sm border"></div>
+            </div>
+          </div>
+        `;
+
+        // Wire Hex Events
+        container.querySelectorAll('[data-m5-mode]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            appState.m5.mode = btn.dataset.m5Mode;
+            renderAll();
+          });
+        });
+
+        container.querySelectorAll('[data-m5-hex-q]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            appState.m5.customHex = null;
+            appState.m5.hexIdx = Number(btn.dataset.m5HexQ);
+            renderAll();
+          });
+        });
+
+        document.getElementById('m5-gen-hex-btn').addEventListener('click', () => {
+          const randDec = Math.floor(Math.random() * 3500) + 180;
+          const randHex = randDec.toString(16).toUpperCase();
+          appState.m5.customHex = {
+            label: 'Bonus Practice',
+            hex: randHex,
+            decimal: randDec,
+            hint: `${randHex} in base-16 equals ${randDec} in base-10`
+          };
+          renderAll();
+        });
+
+        const checkHexBtn = document.getElementById('m5-check-hex-btn');
+        if (checkHexBtn) {
+          checkHexBtn.addEventListener('click', () => {
+            const val = Number(document.getElementById('m5-hex-input').value);
+            const fb = document.getElementById('m5-hex-feedback');
+            if (val === curHex.decimal) {
+              if (!isCustomHex) {
+                appState.m5.hexSolved[appState.m5.hexIdx] = true;
+                renderAll();
+              } else {
+                fb.className = 'p-3.5 rounded-xl text-xs sm:text-sm border bg-emerald-50 border-emerald-200 text-emerald-900';
+                fb.textContent = `✓ Spot on! ${curHex.hex} in hexadecimal equals ${curHex.decimal} in decimal!`;
+                fb.classList.remove('hidden');
+              }
+            } else {
+              fb.className = 'p-3.5 rounded-xl text-xs sm:text-sm border bg-rose-50 border-rose-200 text-rose-900';
+              fb.textContent = `Not quite! Multiply each digit's decimal value by its column weight (×256, ×16, ×1) using your 4-Function Calculator, then add the products.`;
+              fb.classList.remove('hidden');
+            }
+          });
+        }
+      }
+    }
+
+    /**
+     * Master Render Function
+     */
+    function renderAll() {
+      checkAndSyncProgress();
+      renderHeaderAndNav();
+      const workspace = document.getElementById('mission-workspace');
+      switch (appState.activeMission) {
+        case 1:
+          renderMission1(workspace);
+          break;
+        case 2:
+          renderMission2(workspace);
+          break;
+        case 3:
+          renderMission3(workspace);
+          break;
+        case 4:
+          renderMission4(workspace);
+          break;
+        case 5:
+          renderMission5(workspace);
+          break;
+      }
+    }
+
+    /**
+     * Floating Draggable 4-Function Calculator Logic
+     */
+    function initCalculator() {
+      const calcEl = document.getElementById('four-func-calc');
+      const handle = document.getElementById('calc-drag-handle');
+      const bodyEl = document.getElementById('calc-body');
+      const displayEl = document.getElementById('calc-display');
+      const historyEl = document.getElementById('calc-history');
+
+      let currentInput = '0';
+      let prevValue = null;
+      let operator = null;
+      let shouldResetNext = false;
+
+      function updateScreen() {
+        displayEl.textContent = currentInput;
+        historyEl.textContent = prevValue !== null && operator ? `${prevValue} ${operator}` : '';
+      }
+
+      function compute(a, b, op) {
+        if (op === '+') return a + b;
+        if (op === '-') return a - b;
+        if (op === '*') return a * b;
+        if (op === '/') return b === 0 ? 'Err' : Number((a / b).toFixed(6));
+        return b;
+      }
+
+      calcEl.querySelectorAll('[data-calc]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.calc;
+
+          if (key === 'C') {
+            currentInput = '0';
+            prevValue = null;
+            operator = null;
+            shouldResetNext = false;
+          } else if (key === 'DEL') {
+            if (shouldResetNext || currentInput === 'Err') {
+              currentInput = '0';
+              shouldResetNext = false;
+            } else {
+              currentInput = currentInput.length > 1 ? currentInput.slice(0, -1) : '0';
+            }
+          } else if (['+', '-', '*', '/'].includes(key)) {
+            const num = parseFloat(currentInput);
+            if (prevValue !== null && operator && !shouldResetNext) {
+              const res = compute(prevValue, num, operator);
+              currentInput = String(res);
+              prevValue = res === 'Err' ? null : res;
+            } else {
+              prevValue = num;
+            }
+            operator = key;
+            shouldResetNext = true;
+          } else if (key === '=') {
+            if (prevValue !== null && operator) {
+              const res = compute(prevValue, parseFloat(currentInput), operator);
+              currentInput = String(res);
+              prevValue = null;
+              operator = null;
+              shouldResetNext = true;
+            }
+          } else if (key === '.') {
+            if (shouldResetNext) {
+              currentInput = '0.';
+              shouldResetNext = false;
+            } else if (!currentInput.includes('.')) {
+              currentInput += '.';
+            }
+          } else {
+            // Digit 0-9
+            if (currentInput === '0' || shouldResetNext || currentInput === 'Err') {
+              currentInput = key;
+              shouldResetNext = false;
+            } else if (currentInput.length < 12) {
+              currentInput += key;
+            }
+          }
+          updateScreen();
+        });
+      });
+
+      // Toggle visibility & collapse
+      document.getElementById('toggle-calc-btn').addEventListener('click', () => {
+        calcEl.classList.toggle('hidden');
+      });
+      document.getElementById('calc-close-btn').addEventListener('click', () => {
+        calcEl.classList.add('hidden');
+      });
+      document.getElementById('calc-collapse-btn').addEventListener('click', () => {
+        bodyEl.classList.toggle('hidden');
+      });
+
+      // Dragging support (Mouse & Touch)
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let origLeft = 0;
+      let origTop = 0;
+
+      function startDrag(clientX, clientY) {
+        isDragging = true;
+        const rect = calcEl.getBoundingClientRect();
+        calcEl.style.left = `${rect.left}px`;
+        calcEl.style.top = `${rect.top}px`;
+        calcEl.style.right = 'auto';
+        calcEl.style.bottom = 'auto';
+        startX = clientX;
+        startY = clientY;
+        origLeft = rect.left;
+        origTop = rect.top;
+      }
+
+      function onDrag(clientX, clientY) {
+        if (!isDragging) return;
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+        const maxLeft = window.innerWidth - calcEl.offsetWidth - 8;
+        const maxTop = window.innerHeight - calcEl.offsetHeight - 8;
+        const nextLeft = Math.max(8, Math.min(maxLeft, origLeft + dx));
+        const nextTop = Math.max(8, Math.min(maxTop, origTop + dy));
+        calcEl.style.left = `${nextLeft}px`;
+        calcEl.style.top = `${nextTop}px`;
+      }
+
+      function endDrag() {
+        isDragging = false;
+      }
+
+      handle.addEventListener('mousedown', (e) => {
+        if (e.target.closest('button')) return;
+        startDrag(e.clientX, e.clientY);
+      });
+      window.addEventListener('mousemove', (e) => onDrag(e.clientX, e.clientY));
+      window.addEventListener('mouseup', endDrag);
+
+      handle.addEventListener('touchstart', (e) => {
+        if (e.target.closest('button')) return;
+        const t = e.touches[0];
+        startDrag(t.clientX, t.clientY);
+      }, { passive: true });
+      window.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const t = e.touches[0];
+        onDrag(t.clientX, t.clientY);
+      }, { passive: true });
+      window.addEventListener('touchend', endDrag);
+    }
+
+    /**
+     * Initialize Application on Window Load
+     */
+    window.onload = function () {
+      initCalculator();
+
+      // Cheat Sheet Modal Controls
+      const csModal = document.getElementById('cheatsheet-modal');
+      document.getElementById('open-cheatsheet-btn').addEventListener('click', () => {
+        csModal.classList.remove('hidden');
+      });
+      document.getElementById('close-cheatsheet-btn').addEventListener('click', () => {
+        csModal.classList.add('hidden');
+      });
+      csModal.addEventListener('click', (e) => {
+        if (e.target === csModal) csModal.classList.add('hidden');
+      });
+
+      // Certificate Modal Controls
+      const certModal = document.getElementById('certificate-modal');
+      document.getElementById('open-certificate-btn').addEventListener('click', () => {
+        certModal.classList.remove('hidden');
+      });
+      document.getElementById('close-cert-btn').addEventListener('click', () => {
+        certModal.classList.add('hidden');
+      });
+      document.getElementById('print-cert-btn').addEventListener('click', () => {
+        window.print();
+      });
+
+      renderAll();
+    };
+  </script>
+</body>
+</html>
