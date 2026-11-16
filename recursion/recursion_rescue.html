@@ -1,0 +1,2702 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recursion Rescue — ICS4U Java Edition</title>
+  <!-- Tailwind CSS for responsive layout & utility styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter for crisp UI and JetBrains Mono for authentic Java IDE code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            lab: {
+              bg: '#060b14',
+              panel: '#0c1322',
+              card: '#111b30',
+              border: '#1e2d4a',
+              accent: '#22d3ee',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Custom cyber-lab styling, glowing borders, scrollbars, and stack frame animations */
+    :root {
+      --bg-deep: #060b14;
+      --bg-panel: #0c1322;
+      --bg-card: #121d33;
+      --cyan-glow: rgba(34, 211, 238, 0.25);
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+      --amber-glow: rgba(245, 158, 11, 0.25);
+      --purple-glow: rgba(168, 85, 247, 0.25);
+    }
+
+    body {
+      background-color: var(--bg-deep);
+      background-image:
+        radial-gradient(circle at 15% 10%, rgba(34, 211, 238, 0.06) 0%, transparent 40%),
+        radial-gradient(circle at 85% 90%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.6), rgba(6, 11, 20, 0.95));
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* Subtle cyber grid backdrop */
+    .cyber-grid {
+      background-size: 28px 28px;
+      background-image:
+        linear-gradient(to right, rgba(30, 45, 74, 0.22) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(30, 45, 74, 0.22) 1px, transparent 1px);
+    }
+
+    /* Custom sleek scrollbars */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #080e1a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1f3050;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2f4978;
+    }
+
+    /* Stack Frame Push Animation */
+    @keyframes framePush {
+      0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.96);
+        box-shadow: 0 0 28px rgba(34, 211, 238, 0.55);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .animate-frame-push {
+      animation: framePush 0.36s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Pulse glow for active top frame & base case */
+    @keyframes pulseCyan {
+      0%, 100% {
+        box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.5), 0 8px 24px -6px rgba(34, 211, 238, 0.28);
+      }
+      50% {
+        box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.85), 0 10px 28px -4px rgba(34, 211, 238, 0.42);
+      }
+    }
+
+    .frame-active-glow {
+      animation: pulseCyan 2.4s infinite ease-in-out;
+    }
+
+    @keyframes pulseEmerald {
+      0%, 100% {
+        box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.6), 0 8px 24px -6px rgba(16, 185, 129, 0.32);
+      }
+      50% {
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.95), 0 10px 30px -4px rgba(16, 185, 129, 0.5);
+      }
+    }
+
+    .frame-base-glow {
+      animation: pulseEmerald 2s infinite ease-in-out;
+    }
+
+    /* Blinking console cursor */
+    @keyframes cursorBlink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    .console-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 15px;
+      background-color: #22d3ee;
+      vertical-align: middle;
+      margin-left: 2px;
+      animation: cursorBlink 1s infinite;
+    }
+
+    /* Java Syntax Highlighting Tokens */
+    .tok-kw { color: #c084fc; font-weight: 600; }       /* public, static, void, int, if, return */
+    .tok-type { color: #38bdf8; font-weight: 500; }     /* String, System */
+    .tok-method { color: #60a5fa; }                     /* method identifiers */
+    .tok-str { color: #34d399; }                        /* "strings" and 'chars' */
+    .tok-num { color: #fbbf24; }                        /* numbers */
+    .tok-op { color: #94a3b8; }                         /* operators */
+    .tok-comment { color: #64748b; font-style: italic; }
+
+    /* Code line interactive states */
+    .code-line {
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .code-line-clickable:hover {
+      background-color: rgba(34, 211, 238, 0.08);
+    }
+    .code-line-exec {
+      background-color: rgba(34, 211, 238, 0.14) !important;
+      border-left: 3px solid #22d3ee !important;
+    }
+    .code-line-base {
+      background-color: rgba(16, 185, 129, 0.13);
+      border-left: 3px solid #10b981;
+    }
+    .code-line-rec {
+      background-color: rgba(168, 85, 247, 0.14);
+      border-left: 3px solid #a855f7;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased selection:bg-cyan-500/30 selection:text-cyan-100">
+
+  <!-- ==================== TOP NAVIGATION BAR ==================== -->
+  <header class="sticky top-0 z-30 border-b border-slate-800/90 bg-[#070d19]/95 backdrop-blur-md">
+    <div class="max-w-[1480px] mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand & ICS4U Badge -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 border border-cyan-400/40 flex items-center justify-center shadow-lg shadow-cyan-500/10">
+          <!-- Custom SVG Call Stack Icon -->
+          <svg class="w-6 h-6 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="15" width="16" height="4" rx="1" class="text-emerald-400" stroke="currentColor" />
+            <rect x="4" y="9" width="16" height="4" rx="1" />
+            <path d="M8 5h8" stroke-dasharray="2 2" />
+            <path d="M12 2v3" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white">
+              RECURSION <span class="text-cyan-400">RESCUE</span>
+            </h1>
+            <span class="px-2 py-0.5 text-[11px] font-mono font-semibold uppercase tracking-wider rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
+              ICS4U Java Edition
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">Interactive JVM Call Stack &amp; Recursion Lab</p>
+        </div>
+      </div>
+
+      <!-- Level Selector Pills (Levels 1–6) -->
+      <nav id="level-nav" aria-label="Level Selector" class="flex items-center gap-1.5 overflow-x-auto max-w-full py-1 order-3 lg:order-2 w-full lg:w-auto justify-start lg:justify-center">
+        <!-- Rendered dynamically by JS -->
+      </nav>
+
+      <!-- Score / XP Counter, Audio Toggle, & Field Guide Button -->
+      <div class="flex items-center gap-2 sm:gap-3 order-2 lg:order-3">
+        <!-- XP Counter -->
+        <div id="xp-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-amber-500/30 text-amber-300 font-mono text-xs sm:text-sm font-bold shadow-inner">
+          <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/>
+          </svg>
+          <span id="xp-value">0</span>
+          <span class="text-amber-400/80 text-xs">XP</span>
+        </div>
+
+        <!-- Subtle Sound Toggle -->
+        <button id="sound-toggle-btn" type="button" title="Toggle Lab Sound Effects"
+          class="p-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-slate-300 hover:text-cyan-300 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/50">
+          <svg id="sound-on-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg id="sound-off-icon" class="w-4 h-4 hidden text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+
+        <!-- Recursion Field Guide Modal Trigger -->
+        <button id="open-guide-btn" type="button"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/40 text-cyan-200 text-xs sm:text-sm font-semibold transition-all shadow-sm hover:shadow-cyan-500/20 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+          <svg class="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+          <span>Recursion Field Guide</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN TWO-COLUMN WORKSPACE ==================== -->
+  <main class="max-w-[1480px] mx-auto px-3 sm:px-6 py-4 sm:py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+      <!-- ==================== LEFT COLUMN: JAVA IDE & LIVE CONSOLE ==================== -->
+      <section aria-label="Java IDE and Console" class="lg:col-span-5 flex flex-col gap-4">
+        <!-- Java Editor Card -->
+        <div class="rounded-2xl bg-[#0b1221] border border-slate-800/90 shadow-2xl overflow-hidden">
+          <!-- IDE Window Top Bar -->
+          <div class="px-4 py-2.5 bg-[#0f182c] border-b border-slate-800/90 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+              </div>
+              <div class="h-4 w-[1px] bg-slate-700/80"></div>
+              <div class="flex items-center gap-1.5 font-mono text-xs sm:text-sm font-semibold text-slate-200">
+                <span class="text-amber-400 font-bold">☕</span>
+                <span id="ide-filename">CountdownLab.java</span>
+              </div>
+            </div>
+            <span id="ide-status-pill" class="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-slate-800 text-cyan-300 border border-slate-700">
+              Stage 1: Tag Mode
+            </span>
+          </div>
+
+          <!-- Stage 1 Tagging Toolbar (Shown only during Stage 1) -->
+          <div id="stage1-tag-toolbar" class="px-4 py-2.5 bg-slate-900/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <button id="mode-base-btn" type="button"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                Tag Base Case
+              </button>
+              <button id="mode-rec-btn" type="button"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border">
+                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                Tag Recursive Call
+              </button>
+            </div>
+            <button id="clear-tags-btn" type="button"
+              class="text-xs text-slate-400 hover:text-slate-200 underline underline-offset-2 px-1.5 py-1">
+              Clear Tags
+            </button>
+          </div>
+
+          <!-- Java Source Code Lines Container -->
+          <div id="code-editor-body" class="py-3 font-mono text-xs sm:text-[13.5px] leading-relaxed overflow-x-auto select-none">
+            <!-- Lines rendered dynamically by JS -->
+          </div>
+
+          <!-- IDE Footer Legend -->
+          <div class="px-4 py-2 bg-[#090f1d] border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400 font-mono">
+            <span id="ide-footer-hint">Click lines inside the recursive method to tag cases.</span>
+            <span class="text-slate-500">JDK 17 • UTF-8</span>
+          </div>
+        </div>
+
+        <!-- Java Console Output Panel -->
+        <div class="rounded-2xl bg-[#070c17] border border-slate-800/90 shadow-xl overflow-hidden">
+          <div class="px-4 py-2 bg-[#0d1526] border-b border-slate-800/90 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+              <span class="font-mono text-xs font-semibold tracking-wide text-slate-200 uppercase">
+                Java Console Output <span class="text-slate-500 normal-case">(System.out)</span>
+              </span>
+            </div>
+            <span id="console-state-label" class="text-[11px] font-mono text-slate-500">STANDBY</span>
+          </div>
+          <div class="p-4 min-h-[96px] font-mono text-sm sm:text-base bg-[#050911] flex flex-col justify-between">
+            <div id="console-output-text" class="text-emerald-300 whitespace-pre-wrap break-all leading-relaxed">
+              <span class="text-slate-500 italic text-xs">// Complete Stages 1 &amp; 2 to execute and trace System.out...</span>
+            </div>
+            <div class="mt-2 pt-2 border-t border-slate-900 flex items-center justify-between text-[11px] text-slate-500">
+              <span id="console-main-call">Entry: main(String[] args)</span>
+              <span id="console-char-count">0 chars printed</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== RIGHT COLUMN: MISSION CONTROL & CALL STACK ==================== -->
+      <section aria-label="Mission Control and Visual Call Stack" class="lg:col-span-7 flex flex-col gap-4">
+        <!-- Mission Header & 3-Stage Stepper Card -->
+        <div class="rounded-2xl bg-[#0c1322] border border-slate-800/90 p-4 sm:p-5 shadow-xl">
+          <!-- Level Title & Concept Pill -->
+          <div class="flex flex-wrap items-start justify-between gap-2 mb-4">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span id="mission-level-badge" class="px-2.5 py-0.5 rounded-md text-xs font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                  LEVEL 1 OF 6
+                </span>
+                <span id="mission-concept-tag" class="text-xs font-medium text-slate-400">
+                  Pre-Recursion Execution &amp; Void Base Case
+                </span>
+              </div>
+              <h2 id="mission-title" class="text-lg sm:text-xl font-bold text-white mt-1">
+                Countdown (<code class="text-cyan-300 font-mono text-base">void</code> &amp; Pre-Recursion Print)
+              </h2>
+            </div>
+
+            <!-- Hint Button -->
+            <button id="toggle-hint-btn" type="button"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-semibold transition-colors">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18h6"></path>
+                <path d="M10 22h4"></path>
+                <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"></path>
+              </svg>
+              <span>ICS4U Hint</span>
+            </button>
+          </div>
+
+          <!-- Collapsible Hint Drawer -->
+          <div id="hint-drawer" class="hidden mb-4 p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/30 text-amber-100/90 text-xs sm:text-sm leading-relaxed">
+            <div class="flex items-start gap-2.5">
+              <span class="text-amber-400 font-bold mt-0.5">💡</span>
+              <p id="hint-text"></p>
+            </div>
+          </div>
+
+          <!-- 3-Stage Progress Stepper -->
+          <div class="grid grid-cols-3 gap-2 sm:gap-3" role="tablist" aria-label="Mission Stages">
+            <button id="stepper-1" type="button"
+              class="flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all">
+              <span id="stepper-1-num" class="w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0">1</span>
+              <div class="min-w-0">
+                <div class="text-[11px] uppercase tracking-wider font-mono opacity-75">Stage 1</div>
+                <div class="text-xs sm:text-sm font-semibold truncate">Identify Cases</div>
+              </div>
+            </button>
+
+            <button id="stepper-2" type="button"
+              class="flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all">
+              <span id="stepper-2-num" class="w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0">2</span>
+              <div class="min-w-0">
+                <div class="text-[11px] uppercase tracking-wider font-mono opacity-75">Stage 2</div>
+                <div class="text-xs sm:text-sm font-semibold truncate">Predict Output</div>
+              </div>
+            </button>
+
+            <button id="stepper-3" type="button"
+              class="flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all">
+              <span id="stepper-3-num" class="w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0">3</span>
+              <div class="min-w-0">
+                <div class="text-[11px] uppercase tracking-wider font-mono opacity-75">Stage 3</div>
+                <div class="text-xs sm:text-sm font-semibold truncate">Trace Call Stack</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== STAGE 1 VIEW: IDENTIFY BASE & RECURSIVE CASES ==================== -->
+        <div id="stage-1-panel" class="rounded-2xl bg-[#0c1322] border border-slate-800/90 p-4 sm:p-6 shadow-xl">
+          <h3 class="text-base sm:text-lg font-bold text-white mb-1.5">
+            Step 1: Map the Recursive Anatomy
+          </h3>
+          <p id="stage1-prompt" class="text-sm text-slate-300 leading-relaxed mb-4">
+            Every valid recursive method in Java needs two essential parts: a <span class="text-emerald-400 font-semibold">Base Case</span> that stops recursion without making another call, and a <span class="text-purple-400 font-semibold">Recursive Call</span> that reduces the problem toward that base case.
+          </p>
+
+          <!-- Current Tag Selections Status Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+            <!-- Base Case Selection Box -->
+            <div id="base-selection-card" class="p-3.5 rounded-xl bg-slate-900/90 border border-emerald-500/30">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">
+                  1. Base Case Tag
+                </span>
+                <span id="base-line-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                  Not tagged
+                </span>
+              </div>
+              <p id="base-line-preview" class="font-mono text-xs text-slate-300 truncate">
+                Select "Tag Base Case" &amp; click a line in the IDE
+              </p>
+            </div>
+
+            <!-- Recursive Call Selection Box -->
+            <div id="rec-selection-card" class="p-3.5 rounded-xl bg-slate-900/90 border border-purple-500/30">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-mono font-bold uppercase tracking-wider text-purple-400">
+                  2. Recursive Call Tag
+                </span>
+                <span id="rec-line-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                  Not tagged
+                </span>
+              </div>
+              <p id="rec-line-preview" class="font-mono text-xs text-slate-300 truncate">
+                Select "Tag Recursive Call" &amp; click a line in the IDE
+              </p>
+            </div>
+          </div>
+
+          <!-- Verify Action Button -->
+          <div class="flex flex-wrap items-center gap-3">
+            <button id="verify-stage1-btn" type="button"
+              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all active:scale-[0.99]">
+              Verify Structure
+            </button>
+          </div>
+
+          <!-- Stage 1 Feedback Banner -->
+          <div id="stage1-feedback" class="hidden mt-4 p-4 rounded-xl border text-sm leading-relaxed">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- ==================== STAGE 2 VIEW: PREDICT OUTPUT ==================== -->
+        <div id="stage-2-panel" class="hidden rounded-2xl bg-[#0c1322] border border-slate-800/90 p-4 sm:p-6 shadow-xl">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <h3 class="text-base sm:text-lg font-bold text-white">
+              Step 2: Predict the Java Output
+            </h3>
+            <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/25">
+              +100 XP First-Try Bonus
+            </span>
+          </div>
+
+          <p id="stage2-question" class="text-sm text-slate-300 leading-relaxed mb-4">
+            <!-- Populated dynamically -->
+          </p>
+
+          <!-- 4 Multiple Choice Options -->
+          <div id="stage2-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Stage 2 Feedback & Proceed Card -->
+          <div id="stage2-feedback" class="hidden mt-4 p-4 rounded-xl border text-sm leading-relaxed">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- ==================== STAGE 3 VIEW: VISUAL CALL STACK STEP-THROUGH ==================== -->
+        <div id="stage-3-panel" class="hidden flex flex-col gap-4">
+          <!-- Execution Control & Unwinding Checkpoint Bar -->
+          <div class="rounded-2xl bg-[#0c1322] border border-slate-800/90 p-4 sm:p-5 shadow-xl">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-2">
+                <span id="trace-phase-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
+                  WINDING PHASE
+                </span>
+                <span id="trace-step-counter" class="text-xs font-mono text-slate-400">
+                  Step 1 of 10
+                </span>
+              </div>
+
+              <!-- Step Controls -->
+              <div class="flex items-center gap-2">
+                <button id="step-back-btn" type="button"
+                  class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:pointer-events-none border border-slate-700 text-slate-200 text-xs font-semibold transition-colors">
+                  ← Back
+                </button>
+                <button id="step-forward-btn" type="button"
+                  class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 disabled:opacity-40 disabled:pointer-events-none text-slate-950 font-bold text-xs sm:text-sm shadow-md shadow-cyan-500/20 transition-all">
+                  Step Forward →
+                </button>
+                <button id="reset-trace-btn" type="button" title="Restart Stack Trace"
+                  class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-400 hover:text-slate-200 text-xs font-mono transition-colors">
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <!-- Live JVM Execution Narration -->
+            <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-slate-200 leading-relaxed flex items-start gap-2.5">
+              <span class="text-cyan-400 font-mono font-bold mt-0.5">▶</span>
+              <p id="trace-narration">Click "Step Forward" to push the first recursive frame onto the JVM Call Stack.</p>
+            </div>
+
+            <!-- Interactive Unwinding Micro-Checkpoint (Shown when step requires return verification) -->
+            <div id="checkpoint-box" class="hidden mt-3.5 p-4 rounded-xl bg-gradient-to-br from-amber-950/40 via-slate-900 to-emerald-950/30 border border-amber-400/50 shadow-lg">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                  Unwinding Checkpoint
+                </span>
+                <span class="text-xs text-amber-200/80">Answer to pop &amp; unwind frame</span>
+              </div>
+              <p id="checkpoint-question" class="text-sm font-semibold text-white mb-3"></p>
+              <div id="checkpoint-options" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <!-- 3 micro-prompt buttons populated dynamically -->
+              </div>
+              <div id="checkpoint-feedback" class="hidden mt-3 text-xs sm:text-sm rounded-lg p-2.5 border"></div>
+            </div>
+          </div>
+
+          <!-- Level Rescued Completion Card (Shown when trace completes) -->
+          <div id="level-rescued-card" class="hidden rounded-2xl bg-gradient-to-br from-emerald-950/60 via-[#0d192b] to-cyan-950/50 border-2 border-emerald-400/60 p-5 sm:p-6 shadow-2xl">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-300 text-xl font-bold shadow-lg shadow-emerald-500/20">
+                  ✓
+                </div>
+                <div>
+                  <span class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">
+                    Stack Completely Unwound
+                  </span>
+                  <h3 id="rescued-title" class="text-xl font-extrabold text-white">
+                    Level 1 Rescued!
+                  </h3>
+                </div>
+              </div>
+              <div id="rescued-xp-pill" class="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/40 font-mono text-xs sm:text-sm font-bold text-amber-300">
+                +250 XP Earned
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-950/75 border border-emerald-500/25 mb-4">
+              <div class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-300 mb-1">
+                ICS4U Key Takeaway
+              </div>
+              <p id="rescued-takeaway" class="text-sm text-slate-200 leading-relaxed"></p>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <button id="replay-level-btn" type="button"
+                class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs sm:text-sm font-semibold transition-colors">
+                Replay Level
+              </button>
+              <button id="next-level-btn" type="button"
+                class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/25 transition-all">
+                Unlock Next Level →
+              </button>
+            </div>
+          </div>
+
+          <!-- Visual LIFO Call Stack Tower -->
+          <div class="rounded-2xl bg-[#0a101e] border border-slate-800/90 p-4 sm:p-5 shadow-2xl cyber-grid">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                <h4 class="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-200">
+                  JVM Call Stack Memory <span class="text-slate-400 font-normal">(LIFO — Last In, First Out)</span>
+                </h4>
+              </div>
+              <span id="stack-depth-badge" class="px-2.5 py-0.5 rounded-md font-mono text-xs bg-slate-900 border border-slate-700 text-cyan-300">
+                Active Frames: 1
+              </span>
+            </div>
+
+            <!-- Stack Tower Container (Grows upward from bottom!) -->
+            <div class="min-h-[290px] flex flex-col justify-end rounded-xl bg-[#060a13]/90 border border-slate-800/90 p-3 sm:p-4 relative">
+              <!-- Stack Frames List (Rendered from Top of Stack down to Bottom main frame) -->
+              <div id="call-stack-frames" class="flex flex-col gap-2.5">
+                <!-- Stack Frame cards injected here by JS -->
+              </div>
+
+              <!-- Stack Base Plate -->
+              <div class="mt-3 pt-2 border-t-2 border-dashed border-slate-700/80 flex items-center justify-between text-[11px] font-mono text-slate-500">
+                <span>▲ STACK GROWS UPWARD (PUSH)</span>
+                <span>THREAD STACK BASE (0x7FF0)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- ==================== RECURSION FIELD GUIDE MODAL ==================== -->
+  <div id="field-guide-modal" role="dialog" aria-modal="true" aria-labelledby="guide-modal-title"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-sm">
+    <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0d1526] border border-cyan-500/40 shadow-2xl">
+      <!-- Modal Header -->
+      <div class="sticky top-0 z-10 px-5 py-4 bg-[#0d1526]/95 backdrop-blur border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+            ICS4U REFERENCE
+          </span>
+          <h2 id="guide-modal-title" class="text-lg sm:text-xl font-bold text-white">
+            Recursion Field Guide
+          </h2>
+        </div>
+        <button id="close-guide-btn" type="button" aria-label="Close Field Guide"
+          class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="p-5 space-y-4 text-sm text-slate-300">
+        <!-- Concept 1: Base Case -->
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-emerald-500/30">
+          <h3 class="font-bold text-emerald-400 text-base mb-1">1. Base Case (The Stopping Condition)</h3>
+          <p class="leading-relaxed">
+            The simplest instance of the problem that can be solved directly <strong>without making another recursive call</strong>. Without a reachable base case, recursion never terminates.
+          </p>
+          <pre class="mt-2 p-2.5 rounded-lg bg-slate-950 font-mono text-xs text-emerald-300 overflow-x-auto">if (n &lt;= 1) return 1; // Stops recursion immediately</pre>
+        </div>
+
+        <!-- Concept 2: Recursive Step -->
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-purple-500/30">
+          <h3 class="font-bold text-purple-400 text-base mb-1">2. Recursive Step (Progress Toward Base Case)</h3>
+          <p class="leading-relaxed">
+            The method calls itself with a <strong>modified argument</strong> that moves strictly closer to the base case (e.g., <code class="text-cyan-300">n - 1</code>, <code class="text-cyan-300">n / 10</code>, or <code class="text-cyan-300">s.substring(1)</code>).
+          </p>
+          <pre class="mt-2 p-2.5 rounded-lg bg-slate-950 font-mono text-xs text-purple-300 overflow-x-auto">return n * factorial(n - 1); // Subproblem is smaller by 1</pre>
+        </div>
+
+        <!-- Concept 3: Call Stack (LIFO) -->
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-cyan-500/30">
+          <h3 class="font-bold text-cyan-400 text-base mb-1">3. The JVM Call Stack (LIFO)</h3>
+          <p class="leading-relaxed">
+            Every method invocation pushes a brand-new <strong>Stack Frame</strong> onto the JVM Call Stack containing its own independent parameters, local variables, and return address. Frames are popped in <strong>Last-In, First-Out (LIFO)</strong> order.
+          </p>
+        </div>
+
+        <!-- Concept 4: Winding vs Unwinding -->
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-blue-500/30">
+          <h3 class="font-bold text-blue-400 text-base mb-1">4. Winding vs. Unwinding Phases</h3>
+          <ul class="list-disc list-inside space-y-1 text-slate-300">
+            <li><strong>Winding (Going Down):</strong> Code <em>before</em> the recursive call executes as frames are pushed onto the stack.</li>
+            <li><strong>Unwinding (Coming Back Up):</strong> Code <em>after</em> the recursive call (or pending <code class="text-cyan-300">return</code> expressions) stays paused until the child frame returns a value.</li>
+          </ul>
+        </div>
+
+        <!-- Concept 5: StackOverflowError -->
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-rose-500/30">
+          <h3 class="font-bold text-rose-400 text-base mb-1">5. Java <code class="font-mono">StackOverflowError</code></h3>
+          <p class="leading-relaxed">
+            If the base case is missing or the recursive argument moves <em>away</em> from the base case (e.g., calling <code class="text-rose-300">factorial(n + 1)</code>), stack frames accumulate until the JVM runs out of call stack memory and throws <code class="text-rose-300 font-mono">java.lang.StackOverflowError</code>.
+          </p>
+        </div>
+
+        <!-- Classroom Mode Utility for Teachers / Self-Paced Review -->
+        <div class="pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+          <span class="text-xs text-slate-400">
+            Instructor / Review Mode: Unlock all 6 levels immediately if needed.
+          </span>
+          <button id="unlock-all-btn" type="button"
+            class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-cyan-300 transition-colors">
+            Unlock All 6 Levels
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== APPLICATION LOGIC & CURRICULUM DATA ==================== -->
+  <script>
+    /**
+     * Subtle Web Audio API synthesizer for cyber-lab tactile feedback
+     * (No external audio files required; respects user mute toggle)
+     */
+    const LabAudio = (() => {
+      let ctx = null;
+      let enabled = true;
+
+      function ensureCtx() {
+        if (!ctx && (window.AudioContext || window.webkitAudioContext)) {
+          ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (ctx && ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
+      }
+
+      function playTone(freq, duration = 0.09, type = 'sine', gainVal = 0.06, delay = 0) {
+        if (!enabled) return;
+        try {
+          ensureCtx();
+          if (!ctx) return;
+          const now = ctx.currentTime + delay;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(gainVal, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration);
+        } catch (e) {
+          // Ignore audio errors if browser blocks autoplay
+        }
+      }
+
+      return {
+        isEnabled: () => enabled,
+        toggle: () => {
+          enabled = !enabled;
+          return enabled;
+        },
+        click: () => playTone(520, 0.05, 'triangle', 0.04),
+        push: () => {
+          playTone(340, 0.08, 'sine', 0.06, 0);
+          playTone(480, 0.10, 'sine', 0.06, 0.05);
+        },
+        pop: () => {
+          playTone(540, 0.08, 'sine', 0.06, 0);
+          playTone(390, 0.10, 'sine', 0.05, 0.05);
+        },
+        baseCase: () => {
+          playTone(587.33, 0.12, 'triangle', 0.07, 0);
+          playTone(880, 0.18, 'triangle', 0.07, 0.08);
+        },
+        error: () => {
+          playTone(210, 0.14, 'sawtooth', 0.05, 0);
+          playTone(175, 0.16, 'sawtooth', 0.05, 0.09);
+        },
+        rescue: () => {
+          playTone(523.25, 0.12, 'triangle', 0.07, 0);
+          playTone(659.25, 0.12, 'triangle', 0.07, 0.09);
+          playTone(783.99, 0.14, 'triangle', 0.07, 0.18);
+          playTone(1046.5, 0.28, 'triangle', 0.08, 0.27);
+        }
+      };
+    })();
+
+    /**
+     * Complete 6-Level ICS4U Java Recursion Curriculum Data
+     * Each level includes:
+     *  - Syntax-ready Java code lines (1-indexed)
+     *  - Stage 1 valid base case and recursive call line numbers + pedagogical explanations
+     *  - Stage 2 multiple-choice prediction question with ICS4U distractors
+     *  - Stage 3 exact step-by-step JVM execution trace with stack frames, live console output,
+     *    and interactive unwinding checkpoints
+     */
+    const LEVELS = [
+      // ==================== LEVEL 1: COUNTDOWN ====================
+      {
+        id: 1,
+        shortTitle: 'Countdown',
+        title: 'Countdown (void & Pre-Recursion Print)',
+        conceptTag: 'Pre-Recursion Execution & Void Base Case',
+        fileName: 'CountdownLab.java',
+        mainCall: 'countdown(3);',
+        hint: 'Look for the if-statement that stops the method when n reaches 0 (the Base Case), and the line where countdown(...) calls itself with n - 1 (the Recursive Call). Notice System.out.print runs BEFORE the recursive call!',
+        code: [
+          'public class CountdownLab {',
+          '    public static void countdown(int n) {',
+          '        if (n == 0) {',
+          '            System.out.print("Blastoff!");',
+          '            return;',
+          '        }',
+          '        System.out.print(n + " ");',
+          '        countdown(n - 1);',
+          '    }',
+          '',
+          '    public static void main(String[] args) {',
+          '        countdown(3);',
+          '    }',
+          '}'
+        ],
+        baseValidLines: [3, 4, 5],
+        baseCanonicalLine: 3,
+        recursiveValidLines: [8],
+        recursiveCanonicalLine: 8,
+        stage1SuccessMsg: 'Spot on! Line 3 (if (n == 0)) is the Base Case that prints "Blastoff!" and returns without calling countdown again. Line 8 (countdown(n - 1)) is the Recursive Call, reducing n by 1 each frame until n == 0.',
+        stage2: {
+          question: 'When main() invokes countdown(3), what exact text is printed to the Java console?',
+          options: [
+            {
+              text: '3 2 1 Blastoff!',
+              correct: true,
+              explanation: 'Correct! Because System.out.print(n + " ") happens BEFORE countdown(n - 1), each frame prints its value of n during the downward winding phase (3, then 2, then 1), and countdown(0) prints "Blastoff!".'
+            },
+            {
+              text: 'Blastoff! 1 2 3',
+              correct: false,
+              explanation: 'Not quite—that reverse order would occur if System.out.print were placed AFTER countdown(n - 1). Here, printing happens before the recursive call.'
+            },
+            {
+              text: '3 2 1 0 Blastoff!',
+              correct: false,
+              explanation: 'Watch the base case! When n == 0, the if-block executes return; on line 5, exiting the method before line 7 can print 0.'
+            },
+            {
+              text: 'StackOverflowError',
+              correct: false,
+              explanation: 'No overflow here: n starts at 3 and decreases by 1 each call (3 → 2 → 1 → 0), reliably reaching the base case n == 0.'
+            }
+          ]
+        },
+        takeaway: 'Statements placed BEFORE a recursive call execute during the "winding" phase (top-down as stack frames are pushed). Once the void base case executes return;, each frame pops cleanly without any remaining post-recursion work.',
+        steps: [
+          {
+            activeLine: 12,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'Program starts in main() at line 12 and invokes countdown(3). A new stack frame is pushed onto the JVM Call Stack.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 12, status: 'PAUSED', detail: 'Waiting for countdown(3) to finish' },
+              { id: 'f1', depth: 1, signature: 'countdown(n = 3)', line: 2, status: 'EXECUTING', detail: 'Entered method with parameter n = 3' }
+            ]
+          },
+          {
+            activeLine: 7,
+            phase: 'WINDING',
+            consoleOutput: '3 ',
+            narration: 'In countdown(3): n == 0 is false. Line 7 executes BEFORE the recursive call and prints "3 " to the console.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 12, status: 'PAUSED', detail: 'Waiting for countdown(3)' },
+              { id: 'f1', depth: 1, signature: 'countdown(n = 3)', line: 7, status: 'EXECUTING', detail: 'Printed "3 " → proceeding to line 8' }
+            ]
+          },
+          {
+            activeLine: 8,
+            phase: 'WINDING',
+            consoleOutput: '3 ',
+            narration: 'Line 8 calls countdown(2). countdown(3) pauses at line 8 while countdown(2) is pushed onto the TOP OF STACK.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 12, status: 'PAUSED', detail: 'Waiting for countdown(3)' },
+              { id: 'f1', depth: 1, signature: 'countdown(n = 3)', line: 8, status: 'PAUSED', detail: 'Paused at line 8 (waiting for child)' },
+              { id: 'f2', depth: 2, signature: 'countdown(n = 2)', line: 2, status: 'EXECUTING', detail: 'Entered method with parameter n = 2' }
+            ]
+          },
+          {
+            activeLine: 7,
+            phase: 'WINDING',
+            consoleOutput: '3 2 ',
+            narration: 'In countdown(2): n == 0 is false. Line 7 prints "2 " immediately during the winding phase.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 12, status: 'PAUSED', detail: 'Waiting for countdown(3)' },
+              { id: 'f1', depth: 1, signature: 'countdown(n = 3)', line: 8, status: 'PAUSED', detail: 'Paused at line 8' },
+              { id: 'f2', depth: 2, signature: 'countdown(n = 2)', line: 7, status: 'EXECUTING', detail: 'Printed "2 " → proceeding to line 8' }
+            ]
+          },
+          {
+            activeLine: 8,
+            phase: 'WINDING',
+            consoleOutput: '3 2 ',
+            narration: 'Line 8 calls countdown(1). Frame countdown(2) pauses, and countdown(1) is pushed onto the stack.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 12, status: 'PAUSED', detail: 'Waiting for countdown(3)' },
+              { id: 'f1', depth: 1, signature: 'countdown(n = 3)', line: 8, status: 'PAUSED', detail: 'Paused at line 8' },
+              { id: 'f2', depth: 2, signature: 'countdown(n = 2)', line: 8, status: 'PAUSED', detail: 'Paused at line 8 (waiting for child)' },
+              { id: 'f3', depth: 3, signature: 'countdown(n = 1)', line: 2, status: 'EXECUTING', detail: 'Entered method with parameter n = 1' }
+            ]
+          },
+          {
+            activeLine: 7,
+            phase: 'WINDING',
+            consoleOutput: '3 2 1 ',
+            narration: 'In countdown(1): n == 0 is false. Line 7 prints "1 " to the console.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 12, status: 'PAUSED', detail: 'Waiting for countdown(3)' },
+              { id: 'f1', depth: 1, signature: 'countdown(n = 3)', line: 8, status: 'PAUSED', detail: 'Paused at line 8' },
+              { id: 'f2', depth: 2, signature: 'countdown(n = 2)', line: 8, status: 'PAUSED', detail: 'Paused at line 8' },
+              { id: 'f3', depth: 3, signature: 'countdown(n = 1)', line: 7, status: 'EXECUTING', detail: 'Printed "1 " → proceeding to line 8' }
+            ]
+          },
+          {
+            activeLine: 8,
+            phase: 'WINDING',
+            consoleOutput: '3 2 1 ',
+            narration: 'Line 8 calls countdown(0). Frame countdown(0) is pushed to the top of the stack.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 12, status: 'PAUSED', detail: 'Waiting for countdown(3)' },
+              { id: 'f1', depth: 1, signature: 'countdown(n = 3)', line: 8, status: 'PAUSED', detail: 'Paused at line 8' },
+              { id: 'f2', depth: 2, signature: 'countdown(n = 2)', line: 8, status: 'PAUSED', detail: 'Paused at line 8' },
+              { id: 'f3', depth: 3, signature: 'countdown(n = 1)', line: 8, status: 'PAUSED', detail: 'Paused at line 8 (waiting for child)' },
+              { id: 'f4', depth: 4, signature: 'countdown(n = 0)', line: 2, status: 'EXECUTING', detail: 'Entered method with parameter n = 0' }
+            ]
+          },
+          {
+            activeLine: 4,
+            phase: 'BASE_CASE',
+            consoleOutput: '3 2 1 Blastoff!',
+            narration: 'BASE CASE REACHED! In countdown(0), n == 0 is true! Line 4 prints "Blastoff!" and line 5 prepares to return.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 12, status: 'PAUSED', detail: 'Waiting for countdown(3)' },
+              { id: 'f1', depth: 1, signature: 'countdown(n = 3)', line: 8, status: 'PAUSED', detail: 'Paused at line 8' },
+              { id: 'f2', depth: 2, signature: 'countdown(n = 2)', line: 8, status: 'PAUSED', detail: 'Paused at line 8' },
+              { id: 'f3', depth: 3, signature: 'countdown(n = 1)', line: 8, status: 'PAUSED', detail: 'Paused at line 8' },
+              { id: 'f4', depth: 4, signature: 'countdown(n = 0)', line: 5, status: 'BASE_CASE', detail: 'Base case n == 0! Printed "Blastoff!"' }
+            ],
+            checkpoint: {
+              question: 'Base case reached in countdown(0)! What happens when line 5 (return;) executes?',
+              options: [
+                'countdown(0) pops off the stack and returns control to countdown(1)',
+                'countdown(-1) is called next',
+                'The entire program terminates immediately without popping frames'
+              ],
+              correctIndex: 0,
+              explanation: 'Exactly! return; pops countdown(0) off the Call Stack and resumes its caller, countdown(1), right after line 8.'
+            }
+          },
+          {
+            activeLine: 9,
+            phase: 'UNWINDING',
+            consoleOutput: '3 2 1 Blastoff!',
+            narration: 'Unwinding: countdown(0) popped. Frames countdown(1) and countdown(2) have no statements left after line 8, so they pop in LIFO order!',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 12, status: 'PAUSED', detail: 'Waiting for countdown(3)' },
+              { id: 'f1', depth: 1, signature: 'countdown(n = 3)', line: 9, status: 'RETURNING', detail: 'Child calls done → popping frame' }
+            ]
+          },
+          {
+            activeLine: 13,
+            phase: 'COMPLETE',
+            consoleOutput: '3 2 1 Blastoff!',
+            narration: 'countdown(3) popped! Control returns to main(), which finishes at line 13. Call stack is empty and rescue is complete!',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 13, status: 'RETURNING', detail: 'Execution complete! Output: 3 2 1 Blastoff!' }
+            ]
+          }
+        ]
+      },
+
+      // ==================== LEVEL 2: REVERSE ECHO ====================
+      {
+        id: 2,
+        shortTitle: 'Reverse Echo',
+        title: 'Reverse Echo (void & Post-Recursion Print)',
+        conceptTag: 'Stack Unwinding & Deferred Execution',
+        fileName: 'ReverseEchoLab.java',
+        mainCall: 'echoReverse(3);',
+        hint: 'Compare line 6 and line 7 carefully! Because echoReverse(n - 1) comes BEFORE System.out.print(n + " "), every frame must wait for its child call to finish before printing its own n.',
+        code: [
+          'public class ReverseEchoLab {',
+          '    public static void echoReverse(int n) {',
+          '        if (n == 0) {',
+          '            return;',
+          '        }',
+          '        echoReverse(n - 1);',
+          '        System.out.print(n + " ");',
+          '    }',
+          '',
+          '    public static void main(String[] args) {',
+          '        echoReverse(3);',
+          '    }',
+          '}'
+        ],
+        baseValidLines: [3, 4],
+        baseCanonicalLine: 3,
+        recursiveValidLines: [6],
+        recursiveCanonicalLine: 6,
+        stage1SuccessMsg: 'Great job! Lines 3–4 (if (n == 0) return;) form the Base Case, while line 6 (echoReverse(n - 1)) is the Recursive Call. Notice how line 7 sits AFTER the recursive call—meaning it executes during stack unwinding!',
+        stage2: {
+          question: 'System.out.print(n + " ") is placed AFTER the recursive call on line 7. What will echoReverse(3) output?',
+          options: [
+            {
+              text: '1 2 3 ',
+              correct: true,
+              explanation: 'Spot on! Nothing prints on the way down. Once echoReverse(0) hits the base case and returns, frames resume line 7 in LIFO order: n = 1 prints first, then n = 2, then n = 3!'
+            },
+            {
+              text: '3 2 1 ',
+              correct: false,
+              explanation: 'Look at the line order: line 6 calls echoReverse(n - 1) BEFORE line 7 can print n. So 3 is paused on the stack while 2 and 1 run first.'
+            },
+            {
+              text: '0 1 2 3 ',
+              correct: false,
+              explanation: 'When n == 0, line 4 executes return; immediately, so echoReverse(0) never reaches line 7 to print 0.'
+            },
+            {
+              text: '3 3 3 ',
+              correct: false,
+              explanation: 'Each stack frame stores its own independent copy of parameter n (3 in frame #1, 2 in frame #2, and 1 in frame #3).'
+            }
+          ]
+        },
+        takeaway: 'Any statement placed AFTER a recursive call is suspended on the Call Stack until all deeper recursive calls resolve. Because the stack is LIFO (Last-In, First-Out), post-recursion statements execute in reverse order of invocation!',
+        steps: [
+          {
+            activeLine: 11,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'main() invokes echoReverse(3). Frame echoReverse(n = 3) is pushed onto the Call Stack.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 11, status: 'PAUSED', detail: 'Waiting for echoReverse(3)' },
+              { id: 'f1', depth: 1, signature: 'echoReverse(n = 3)', line: 2, status: 'EXECUTING', detail: 'n = 3 (not 0) → moving to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'echoReverse(3) hits line 6 and calls echoReverse(2) BEFORE reaching line 7! Line 7 (print 3) is deferred.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 11, status: 'PAUSED', detail: 'Waiting for echoReverse(3)' },
+              { id: 'f1', depth: 1, signature: 'echoReverse(n = 3)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (line 7 still waiting!)' },
+              { id: 'f2', depth: 2, signature: 'echoReverse(n = 2)', line: 2, status: 'EXECUTING', detail: 'n = 2 (not 0) → moving to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'echoReverse(2) pauses at line 6 and calls echoReverse(1). Still nothing printed to console yet!',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 11, status: 'PAUSED', detail: 'Waiting for echoReverse(3)' },
+              { id: 'f1', depth: 1, signature: 'echoReverse(n = 3)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (print 3 waiting)' },
+              { id: 'f2', depth: 2, signature: 'echoReverse(n = 2)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (print 2 waiting)' },
+              { id: 'f3', depth: 3, signature: 'echoReverse(n = 1)', line: 2, status: 'EXECUTING', detail: 'n = 1 (not 0) → moving to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'echoReverse(1) pauses at line 6 and calls echoReverse(0). Four frames are now stacked!',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 11, status: 'PAUSED', detail: 'Waiting for echoReverse(3)' },
+              { id: 'f1', depth: 1, signature: 'echoReverse(n = 3)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (print 3 waiting)' },
+              { id: 'f2', depth: 2, signature: 'echoReverse(n = 2)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (print 2 waiting)' },
+              { id: 'f3', depth: 3, signature: 'echoReverse(n = 1)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (print 1 waiting)' },
+              { id: 'f4', depth: 4, signature: 'echoReverse(n = 0)', line: 2, status: 'EXECUTING', detail: 'Checking if (n == 0)...' }
+            ]
+          },
+          {
+            activeLine: 4,
+            phase: 'BASE_CASE',
+            consoleOutput: '',
+            narration: 'BASE CASE REACHED! In echoReverse(0), n == 0 is true! Line 4 executes return; without printing 0.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 11, status: 'PAUSED', detail: 'Waiting for echoReverse(3)' },
+              { id: 'f1', depth: 1, signature: 'echoReverse(n = 3)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (print 3 waiting)' },
+              { id: 'f2', depth: 2, signature: 'echoReverse(n = 2)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (print 2 waiting)' },
+              { id: 'f3', depth: 3, signature: 'echoReverse(n = 1)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (print 1 waiting)' },
+              { id: 'f4', depth: 4, signature: 'echoReverse(n = 0)', line: 4, status: 'BASE_CASE', detail: 'Base case n == 0! Returning to caller' }
+            ],
+            checkpoint: {
+              question: 'echoReverse(0) pops off the stack. Which frame is now at TOP OF STACK and what does it do next?',
+              options: [
+                'echoReverse(1) resumes at line 7 and prints "1 "',
+                'echoReverse(3) resumes at line 7 and prints "3 "',
+                'echoReverse(0) prints "0 "'
+              ],
+              correctIndex: 0,
+              explanation: 'Correct! LIFO order means echoReverse(1) is at the top of the stack. It resumes right after line 6 and executes line 7: System.out.print(1 + " ").'
+            }
+          },
+          {
+            activeLine: 7,
+            phase: 'UNWINDING',
+            consoleOutput: '1 ',
+            narration: 'Unwinding #1: echoReverse(1) resumes at line 7, prints "1 ", and finishes!',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 11, status: 'PAUSED', detail: 'Waiting for echoReverse(3)' },
+              { id: 'f1', depth: 1, signature: 'echoReverse(n = 3)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (print 3 waiting)' },
+              { id: 'f2', depth: 2, signature: 'echoReverse(n = 2)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (print 2 waiting)' },
+              { id: 'f3', depth: 3, signature: 'echoReverse(n = 1)', line: 7, status: 'RETURNING', detail: 'Executed line 7 → printed "1 "' }
+            ]
+          },
+          {
+            activeLine: 7,
+            phase: 'UNWINDING',
+            consoleOutput: '1 2 ',
+            narration: 'Unwinding #2: echoReverse(1) popped! Now echoReverse(2) is on top, resumes at line 7, and prints "2 ".',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 11, status: 'PAUSED', detail: 'Waiting for echoReverse(3)' },
+              { id: 'f1', depth: 1, signature: 'echoReverse(n = 3)', line: 6, status: 'PAUSED', detail: 'Paused at line 6 (print 3 waiting)' },
+              { id: 'f2', depth: 2, signature: 'echoReverse(n = 2)', line: 7, status: 'RETURNING', detail: 'Executed line 7 → printed "2 "' }
+            ]
+          },
+          {
+            activeLine: 7,
+            phase: 'UNWINDING',
+            consoleOutput: '1 2 3 ',
+            narration: 'Unwinding #3: echoReverse(2) popped! Finally, echoReverse(3) resumes at line 7 and prints "3 ".',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 11, status: 'PAUSED', detail: 'Waiting for echoReverse(3)' },
+              { id: 'f1', depth: 1, signature: 'echoReverse(n = 3)', line: 7, status: 'RETURNING', detail: 'Executed line 7 → printed "3 "' }
+            ]
+          },
+          {
+            activeLine: 12,
+            phase: 'COMPLETE',
+            consoleOutput: '1 2 3 ',
+            narration: 'echoReverse(3) popped! Control returns to main(), which completes at line 12 with "1 2 3 " printed.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 12, status: 'RETURNING', detail: 'Execution complete! Output: 1 2 3 ' }
+            ]
+          }
+        ]
+      },
+
+      // ==================== LEVEL 3: FACTORIAL ====================
+      {
+        id: 3,
+        shortTitle: 'Factorial',
+        title: 'Factorial (int Return Unwinding)',
+        conceptTag: 'Value-Returning Recursion & Deferred Multiplication',
+        fileName: 'FactorialLab.java',
+        mainCall: 'System.out.println(factorial(4));',
+        hint: 'When a method returns an int, each recursive call pauses inside the expression n * factorial(n - 1) until its child returns a concrete integer.',
+        code: [
+          'public class FactorialLab {',
+          '    public static int factorial(int n) {',
+          '        if (n <= 1) {',
+          '            return 1;',
+          '        }',
+          '        return n * factorial(n - 1);',
+          '    }',
+          '',
+          '    public static void main(String[] args) {',
+          '        System.out.println(factorial(4));',
+          '    }',
+          '}'
+        ],
+        baseValidLines: [3, 4],
+        baseCanonicalLine: 3,
+        recursiveValidLines: [6],
+        recursiveCanonicalLine: 6,
+        stage1SuccessMsg: 'Excellent! Lines 3–4 (if (n <= 1) return 1;) define the Base Case, returning 1 without further recursion. Line 6 (return n * factorial(n - 1);) is the Recursive Call, deferring multiplication until factorial(n - 1) returns.',
+        stage2: {
+          question: 'What integer value is returned by factorial(4) and printed by System.out.println?',
+          options: [
+            {
+              text: '24',
+              correct: true,
+              explanation: 'Correct! factorial(4) unwinds as 4 * (3 * (2 * 1)) = 24.'
+            },
+            {
+              text: '10',
+              correct: false,
+              explanation: '10 would be 4 + 3 + 2 + 1 (addition), whereas line 6 uses multiplication (*).'
+            },
+            {
+              text: '12',
+              correct: false,
+              explanation: 'Check all four factors: 4 * 3 = 12, and then 12 * 2 * 1 = 24.'
+            },
+            {
+              text: '0',
+              correct: false,
+              explanation: 'Notice line 4 returns 1 (the multiplicative identity) at n <= 1. Returning 0 would zero out the entire product!'
+            }
+          ]
+        },
+        takeaway: 'In value-returning recursion, pending arithmetic operations (like n * ...) stay suspended inside each stack frame until the base case supplies an initial return value that cascades back up the stack.',
+        steps: [
+          {
+            activeLine: 10,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'main() calls factorial(4) inside System.out.println(...). Frame factorial(4) is pushed onto the Call Stack.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print factorial(4)' },
+              { id: 'f1', depth: 1, signature: 'factorial(n = 4)', line: 2, status: 'EXECUTING', detail: 'n = 4 > 1 → proceeding to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'factorial(4) reaches line 6: to compute 4 * factorial(3), it must pause and invoke factorial(3).',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print factorial(4)' },
+              { id: 'f1', depth: 1, signature: 'factorial(n = 4)', line: 6, status: 'PAUSED', detail: 'Needs 4 * factorial(3) → waiting' },
+              { id: 'f2', depth: 2, signature: 'factorial(n = 3)', line: 2, status: 'EXECUTING', detail: 'n = 3 > 1 → proceeding to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'factorial(3) reaches line 6: pauses at 3 * factorial(2) and pushes factorial(2) onto the stack.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print factorial(4)' },
+              { id: 'f1', depth: 1, signature: 'factorial(n = 4)', line: 6, status: 'PAUSED', detail: 'Needs 4 * factorial(3)' },
+              { id: 'f2', depth: 2, signature: 'factorial(n = 3)', line: 6, status: 'PAUSED', detail: 'Needs 3 * factorial(2) → waiting' },
+              { id: 'f3', depth: 3, signature: 'factorial(n = 2)', line: 2, status: 'EXECUTING', detail: 'n = 2 > 1 → proceeding to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'factorial(2) reaches line 6: pauses at 2 * factorial(1) and pushes factorial(1) onto the stack.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print factorial(4)' },
+              { id: 'f1', depth: 1, signature: 'factorial(n = 4)', line: 6, status: 'PAUSED', detail: 'Needs 4 * factorial(3)' },
+              { id: 'f2', depth: 2, signature: 'factorial(n = 3)', line: 6, status: 'PAUSED', detail: 'Needs 3 * factorial(2)' },
+              { id: 'f3', depth: 3, signature: 'factorial(n = 2)', line: 6, status: 'PAUSED', detail: 'Needs 2 * factorial(1) → waiting' },
+              { id: 'f4', depth: 4, signature: 'factorial(n = 1)', line: 2, status: 'EXECUTING', detail: 'Checking if (n <= 1)...' }
+            ]
+          },
+          {
+            activeLine: 4,
+            phase: 'BASE_CASE',
+            consoleOutput: '',
+            narration: 'BASE CASE REACHED! In factorial(1), n <= 1 is true! Line 4 prepares to return 1 to factorial(2).',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print factorial(4)' },
+              { id: 'f1', depth: 1, signature: 'factorial(n = 4)', line: 6, status: 'PAUSED', detail: 'Needs 4 * factorial(3)' },
+              { id: 'f2', depth: 2, signature: 'factorial(n = 3)', line: 6, status: 'PAUSED', detail: 'Needs 3 * factorial(2)' },
+              { id: 'f3', depth: 3, signature: 'factorial(n = 2)', line: 6, status: 'PAUSED', detail: 'Needs 2 * factorial(1)' },
+              { id: 'f4', depth: 4, signature: 'factorial(n = 1)', line: 4, status: 'BASE_CASE', detail: 'Base case n <= 1! Returns 1', returnValue: '1' }
+            ],
+            checkpoint: {
+              question: 'Base case hit! What integer does factorial(1) return to factorial(2)?',
+              options: ['1', '0', '4'],
+              correctIndex: 0,
+              explanation: 'Line 4 executes return 1; — popping factorial(1) and passing 1 back to factorial(2).'
+            }
+          },
+          {
+            activeLine: 6,
+            phase: 'UNWINDING',
+            consoleOutput: '',
+            narration: 'Unwinding factorial(2): receives 1 from child, computes 2 * 1 = 2, and prepares to return 2.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print factorial(4)' },
+              { id: 'f1', depth: 1, signature: 'factorial(n = 4)', line: 6, status: 'PAUSED', detail: 'Needs 4 * factorial(3)' },
+              { id: 'f2', depth: 2, signature: 'factorial(n = 3)', line: 6, status: 'PAUSED', detail: 'Needs 3 * factorial(2)' },
+              { id: 'f3', depth: 3, signature: 'factorial(n = 2)', line: 6, status: 'RETURNING', detail: '2 * 1 = 2 → returning 2', returnValue: '2' }
+            ],
+            checkpoint: {
+              question: 'Child returned 1. What value does factorial(2) return to factorial(3)?',
+              options: ['2', '3', '1'],
+              correctIndex: 0,
+              explanation: 'Correct! 2 * 1 = 2. Frame factorial(2) pops and delivers 2 to factorial(3).'
+            }
+          },
+          {
+            activeLine: 6,
+            phase: 'UNWINDING',
+            consoleOutput: '',
+            narration: 'Unwinding factorial(3): receives 2 from child, computes 3 * 2 = 6, and prepares to return 6.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print factorial(4)' },
+              { id: 'f1', depth: 1, signature: 'factorial(n = 4)', line: 6, status: 'PAUSED', detail: 'Needs 4 * factorial(3)' },
+              { id: 'f2', depth: 2, signature: 'factorial(n = 3)', line: 6, status: 'RETURNING', detail: '3 * 2 = 6 → returning 6', returnValue: '6' }
+            ],
+            checkpoint: {
+              question: 'Child returned 2. What value does factorial(3) return to factorial(4)?',
+              options: ['6', '5', '8'],
+              correctIndex: 0,
+              explanation: 'Right on! 3 * 2 = 6. Frame factorial(3) pops and passes 6 up to factorial(4).'
+            }
+          },
+          {
+            activeLine: 6,
+            phase: 'UNWINDING',
+            consoleOutput: '',
+            narration: 'Unwinding factorial(4): receives 6 from child, computes 4 * 6 = 24, and prepares to return 24 to main().',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print factorial(4)' },
+              { id: 'f1', depth: 1, signature: 'factorial(n = 4)', line: 6, status: 'RETURNING', detail: '4 * 6 = 24 → returning 24', returnValue: '24' }
+            ],
+            checkpoint: {
+              question: 'Child returned 6. What final integer does factorial(4) return to main()?',
+              options: ['24', '10', '18'],
+              correctIndex: 0,
+              explanation: '4 * 6 = 24! factorial(4) pops off the stack and returns 24 to main().'
+            }
+          },
+          {
+            activeLine: 10,
+            phase: 'COMPLETE',
+            consoleOutput: '24\n',
+            narration: 'main() receives 24 and executes System.out.println(24). Call stack is completely unwound!',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'RETURNING', detail: 'Printed 24 to console!' }
+            ]
+          }
+        ]
+      },
+
+      // ==================== LEVEL 4: DIGIT SUM ====================
+      {
+        id: 4,
+        shortTitle: 'Digit Sum',
+        title: 'Digit Sum (% and / Integer Recursion)',
+        conceptTag: 'Java Modulo & Integer Division Decomposition',
+        fileName: 'DigitSumLab.java',
+        mainCall: 'System.out.println(sumDigits(425));',
+        hint: 'In Java, n % 10 extracts the rightmost digit (425 % 10 == 5) and integer division n / 10 drops the rightmost digit (425 / 10 == 42). When n has only 1 digit left (n < 10), we hit the base case!',
+        code: [
+          'public class DigitSumLab {',
+          '    public static int sumDigits(int n) {',
+          '        if (n < 10) {',
+          '            return n;',
+          '        }',
+          '        return (n % 10) + sumDigits(n / 10);',
+          '    }',
+          '',
+          '    public static void main(String[] args) {',
+          '        System.out.println(sumDigits(425));',
+          '    }',
+          '}'
+        ],
+        baseValidLines: [3, 4],
+        baseCanonicalLine: 3,
+        recursiveValidLines: [6],
+        recursiveCanonicalLine: 6,
+        stage1SuccessMsg: 'Nicely done! Lines 3–4 (if (n < 10) return n;) stop recursion once n is reduced to a single digit. Line 6 peels off the ones digit (n % 10) and recursively sums the remaining digits (sumDigits(n / 10)).',
+        stage2: {
+          question: 'Using Java integer arithmetic, what does sumDigits(425) return and print?',
+          options: [
+            {
+              text: '11',
+              correct: true,
+              explanation: 'Correct! sumDigits(425) evaluates 5 + sumDigits(42) → 5 + (2 + sumDigits(4)) → 5 + 2 + 4 = 11.'
+            },
+            {
+              text: '524',
+              correct: false,
+              explanation: 'Because both (n % 10) and sumDigits(n / 10) are int values, + performs integer addition (5 + 2 + 4), not String concatenation.'
+            },
+            {
+              text: '7',
+              correct: false,
+              explanation: 'When 42 / 10 evaluates to 4, n < 10 is true and line 4 returns n (which is 4, not 0): 5 + 2 + 4 = 11.'
+            },
+            {
+              text: '425',
+              correct: false,
+              explanation: 'Integer division n / 10 shrinks the number by a factor of 10 on every recursive call (425 → 42 → 4).'
+            }
+          ]
+        },
+        takeaway: 'Combining % 10 (extract last digit) and / 10 (truncate last digit) is a classic ICS4U recursive pattern for processing base-10 integers without converting them to Strings.',
+        steps: [
+          {
+            activeLine: 10,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'main() invokes sumDigits(425). Frame sumDigits(n = 425) is pushed onto the Call Stack.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print sumDigits(425)' },
+              { id: 'f1', depth: 1, signature: 'sumDigits(n = 425)', line: 2, status: 'EXECUTING', detail: '425 < 10 is false → moving to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'In sumDigits(425): 425 % 10 = 5, and 425 / 10 = 42. Frame pauses at 5 + sumDigits(42) and pushes sumDigits(42).',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print sumDigits(425)' },
+              { id: 'f1', depth: 1, signature: 'sumDigits(n = 425)', line: 6, status: 'PAUSED', detail: 'Needs 5 + sumDigits(42) → waiting' },
+              { id: 'f2', depth: 2, signature: 'sumDigits(n = 42)', line: 2, status: 'EXECUTING', detail: '42 < 10 is false → moving to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'In sumDigits(42): 42 % 10 = 2, and 42 / 10 = 4. Frame pauses at 2 + sumDigits(4) and pushes sumDigits(4).',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print sumDigits(425)' },
+              { id: 'f1', depth: 1, signature: 'sumDigits(n = 425)', line: 6, status: 'PAUSED', detail: 'Needs 5 + sumDigits(42)' },
+              { id: 'f2', depth: 2, signature: 'sumDigits(n = 42)', line: 6, status: 'PAUSED', detail: 'Needs 2 + sumDigits(4) → waiting' },
+              { id: 'f3', depth: 3, signature: 'sumDigits(n = 4)', line: 2, status: 'EXECUTING', detail: 'Checking if (n < 10)...' }
+            ]
+          },
+          {
+            activeLine: 4,
+            phase: 'BASE_CASE',
+            consoleOutput: '',
+            narration: 'BASE CASE REACHED! In sumDigits(4), 4 < 10 is true! Line 4 returns n (which is 4) to sumDigits(42).',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print sumDigits(425)' },
+              { id: 'f1', depth: 1, signature: 'sumDigits(n = 425)', line: 6, status: 'PAUSED', detail: 'Needs 5 + sumDigits(42)' },
+              { id: 'f2', depth: 2, signature: 'sumDigits(n = 42)', line: 6, status: 'PAUSED', detail: 'Needs 2 + sumDigits(4)' },
+              { id: 'f3', depth: 3, signature: 'sumDigits(n = 4)', line: 4, status: 'BASE_CASE', detail: 'Base case n < 10! Returns 4', returnValue: '4' }
+            ],
+            checkpoint: {
+              question: 'Base case n < 10 reached! What integer does sumDigits(4) return?',
+              options: ['4', '0', '1'],
+              correctIndex: 0,
+              explanation: 'Line 4 executes return n; where n is 4, popping sumDigits(4) and returning 4.'
+            }
+          },
+          {
+            activeLine: 6,
+            phase: 'UNWINDING',
+            consoleOutput: '',
+            narration: 'Unwinding sumDigits(42): receives 4 from child, evaluates 2 + 4 = 6, and returns 6.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print sumDigits(425)' },
+              { id: 'f1', depth: 1, signature: 'sumDigits(n = 425)', line: 6, status: 'PAUSED', detail: 'Needs 5 + sumDigits(42)' },
+              { id: 'f2', depth: 2, signature: 'sumDigits(n = 42)', line: 6, status: 'RETURNING', detail: '2 + 4 = 6 → returning 6', returnValue: '6' }
+            ],
+            checkpoint: {
+              question: 'Child returned 4. What does sumDigits(42) return (2 + 4)?',
+              options: ['6', '24', '8'],
+              correctIndex: 0,
+              explanation: '2 + 4 = 6! Frame sumDigits(42) pops and passes 6 back to sumDigits(425).'
+            }
+          },
+          {
+            activeLine: 6,
+            phase: 'UNWINDING',
+            consoleOutput: '',
+            narration: 'Unwinding sumDigits(425): receives 6 from child, evaluates 5 + 6 = 11, and returns 11 to main().',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print sumDigits(425)' },
+              { id: 'f1', depth: 1, signature: 'sumDigits(n = 425)', line: 6, status: 'RETURNING', detail: '5 + 6 = 11 → returning 11', returnValue: '11' }
+            ],
+            checkpoint: {
+              question: 'Child returned 6. What final sum does sumDigits(425) return (5 + 6)?',
+              options: ['11', '56', '15'],
+              correctIndex: 0,
+              explanation: '5 + 6 = 11! Frame sumDigits(425) pops and returns 11 to main().'
+            }
+          },
+          {
+            activeLine: 10,
+            phase: 'COMPLETE',
+            consoleOutput: '11\n',
+            narration: 'main() receives 11 and prints 11 to the console. Stack is empty!',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'RETURNING', detail: 'Printed 11 to console!' }
+            ]
+          }
+        ]
+      },
+
+      // ==================== LEVEL 5: STRING REVERSER ====================
+      {
+        id: 5,
+        shortTitle: 'String Reverser',
+        title: 'String Reverser (substring & charAt)',
+        conceptTag: 'Recursive String Slicing & Post-Call Concatenation',
+        fileName: 'StringReverseLab.java',
+        mainCall: 'System.out.println(reverse("JAVA"));',
+        hint: 'In Java, s.substring(1) returns a new String starting at index 1 (dropping index 0). Notice + s.charAt(0) is concatenated AFTER reverse(s.substring(1)) returns!',
+        code: [
+          'public class StringReverseLab {',
+          '    public static String reverse(String s) {',
+          '        if (s.length() <= 1) {',
+          '            return s;',
+          '        }',
+          '        return reverse(s.substring(1)) + s.charAt(0);',
+          '    }',
+          '',
+          '    public static void main(String[] args) {',
+          '        System.out.println(reverse("JAVA"));',
+          '    }',
+          '}'
+        ],
+        baseValidLines: [3, 4],
+        baseCanonicalLine: 3,
+        recursiveValidLines: [6],
+        recursiveCanonicalLine: 6,
+        stage1SuccessMsg: 'Spot on! Lines 3–4 (if (s.length() <= 1) return s;) handle empty or single-character Strings directly. Line 6 recursively reverses the tail substring(1) and appends the first character charAt(0) at the end.',
+        stage2: {
+          question: 'Given "JAVA".substring(1) is "AVA" and "JAVA".charAt(0) is \'J\', what does reverse("JAVA") print?',
+          options: [
+            {
+              text: 'AVAJ',
+              correct: true,
+              explanation: 'Correct! Each frame moves its first character to the back after the remaining substring is reversed: "A" + \'V\' + \'A\' + \'J\' = "AVAJ".'
+            },
+            {
+              text: 'JAVA',
+              correct: false,
+              explanation: 'Because + s.charAt(0) is placed AFTER reverse(s.substring(1)), the leading character is appended to the end rather than kept at the front.'
+            },
+            {
+              text: 'AVJ',
+              correct: false,
+              explanation: 'No characters are lost: "A" is returned at the base case and each unwinding frame appends its own charAt(0).'
+            },
+            {
+              text: 'StringIndexOutOfBoundsException',
+              correct: false,
+              explanation: 'The base case s.length() <= 1 stops at "A" (length 1) before substring(1) is ever called on an empty String.'
+            }
+          ]
+        },
+        takeaway: 'String recursion in Java shrinks problem size via s.substring(1) and builds the result during stack unwinding via concatenation (+). Each stack frame holds its own immutable String reference.',
+        steps: [
+          {
+            activeLine: 10,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'main() calls reverse("JAVA"). Frame reverse(s = "JAVA") is pushed onto the Call Stack.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print reverse("JAVA")' },
+              { id: 'f1', depth: 1, signature: 'reverse(s = "JAVA")', line: 2, status: 'EXECUTING', detail: 'length 4 > 1 → moving to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'reverse("JAVA") pauses at reverse("AVA") + \'J\' and pushes reverse(s = "AVA").',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print reverse("JAVA")' },
+              { id: 'f1', depth: 1, signature: 'reverse(s = "JAVA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("AVA") + \'J\'' },
+              { id: 'f2', depth: 2, signature: 'reverse(s = "AVA")', line: 2, status: 'EXECUTING', detail: 'length 3 > 1 → moving to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'reverse("AVA") pauses at reverse("VA") + \'A\' and pushes reverse(s = "VA").',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print reverse("JAVA")' },
+              { id: 'f1', depth: 1, signature: 'reverse(s = "JAVA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("AVA") + \'J\'' },
+              { id: 'f2', depth: 2, signature: 'reverse(s = "AVA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("VA") + \'A\'' },
+              { id: 'f3', depth: 3, signature: 'reverse(s = "VA")', line: 2, status: 'EXECUTING', detail: 'length 2 > 1 → moving to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'reverse("VA") pauses at reverse("A") + \'V\' and pushes reverse(s = "A").',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print reverse("JAVA")' },
+              { id: 'f1', depth: 1, signature: 'reverse(s = "JAVA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("AVA") + \'J\'' },
+              { id: 'f2', depth: 2, signature: 'reverse(s = "AVA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("VA") + \'A\'' },
+              { id: 'f3', depth: 3, signature: 'reverse(s = "VA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("A") + \'V\'' },
+              { id: 'f4', depth: 4, signature: 'reverse(s = "A")', line: 2, status: 'EXECUTING', detail: 'Checking s.length() <= 1...' }
+            ]
+          },
+          {
+            activeLine: 4,
+            phase: 'BASE_CASE',
+            consoleOutput: '',
+            narration: 'BASE CASE REACHED! "A".length() is 1 (<= 1). Line 4 returns "A" to reverse("VA").',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print reverse("JAVA")' },
+              { id: 'f1', depth: 1, signature: 'reverse(s = "JAVA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("AVA") + \'J\'' },
+              { id: 'f2', depth: 2, signature: 'reverse(s = "AVA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("VA") + \'A\'' },
+              { id: 'f3', depth: 3, signature: 'reverse(s = "VA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("A") + \'V\'' },
+              { id: 'f4', depth: 4, signature: 'reverse(s = "A")', line: 4, status: 'BASE_CASE', detail: 'Base case length <= 1! Returns "A"', returnValue: '"A"' }
+            ],
+            checkpoint: {
+              question: 'Base case reached in reverse("A")! What String does it return?',
+              options: ['"A"', '""', '"J"'],
+              correctIndex: 0,
+              explanation: 'Line 4 returns s, which is "A" in this frame, popping reverse("A").'
+            }
+          },
+          {
+            activeLine: 6,
+            phase: 'UNWINDING',
+            consoleOutput: '',
+            narration: 'Unwinding reverse("VA"): receives "A", appends charAt(0) (\'V\'), and returns "AV".',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print reverse("JAVA")' },
+              { id: 'f1', depth: 1, signature: 'reverse(s = "JAVA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("AVA") + \'J\'' },
+              { id: 'f2', depth: 2, signature: 'reverse(s = "AVA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("VA") + \'A\'' },
+              { id: 'f3', depth: 3, signature: 'reverse(s = "VA")', line: 6, status: 'RETURNING', detail: '"A" + \'V\' = "AV" → returning "AV"', returnValue: '"AV"' }
+            ],
+            checkpoint: {
+              question: 'Child returned "A". What does reverse("VA") return ("A" + \'V\')?',
+              options: ['"AV"', '"VA"', '"A"'],
+              correctIndex: 0,
+              explanation: '"A" + \'V\' evaluates to "AV"! Frame reverse("VA") pops and returns "AV".'
+            }
+          },
+          {
+            activeLine: 6,
+            phase: 'UNWINDING',
+            consoleOutput: '',
+            narration: 'Unwinding reverse("AVA"): receives "AV", appends charAt(0) (\'A\'), and returns "AVA".',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print reverse("JAVA")' },
+              { id: 'f1', depth: 1, signature: 'reverse(s = "JAVA")', line: 6, status: 'PAUSED', detail: 'Needs reverse("AVA") + \'J\'' },
+              { id: 'f2', depth: 2, signature: 'reverse(s = "AVA")', line: 6, status: 'RETURNING', detail: '"AV" + \'A\' = "AVA" → returning "AVA"', returnValue: '"AVA"' }
+            ],
+            checkpoint: {
+              question: 'Child returned "AV". What does reverse("AVA") return ("AV" + \'A\')?',
+              options: ['"AVA"', '"AAV"', '"VAA"'],
+              correctIndex: 0,
+              explanation: '"AV" + \'A\' evaluates to "AVA"! Frame reverse("AVA") pops and passes "AVA" up.'
+            }
+          },
+          {
+            activeLine: 6,
+            phase: 'UNWINDING',
+            consoleOutput: '',
+            narration: 'Unwinding reverse("JAVA"): receives "AVA", appends charAt(0) (\'J\'), and returns "AVAJ" to main().',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print reverse("JAVA")' },
+              { id: 'f1', depth: 1, signature: 'reverse(s = "JAVA")', line: 6, status: 'RETURNING', detail: '"AVA" + \'J\' = "AVAJ" → returning "AVAJ"', returnValue: '"AVAJ"' }
+            ],
+            checkpoint: {
+              question: 'Child returned "AVA". What final String does reverse("JAVA") return?',
+              options: ['"AVAJ"', '"JAVA"', '"AAVJ"'],
+              correctIndex: 0,
+              explanation: '"AVA" + \'J\' = "AVAJ"! Frame reverse("JAVA") pops and returns "AVAJ" to main().'
+            }
+          },
+          {
+            activeLine: 10,
+            phase: 'COMPLETE',
+            consoleOutput: 'AVAJ\n',
+            narration: 'main() receives "AVAJ" and prints AVAJ to the console. Stack is completely unwound!',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'RETURNING', detail: 'Printed AVAJ to console!' }
+            ]
+          }
+        ]
+      },
+
+      // ==================== LEVEL 6: FIBONACCI BRANCHING CALLS ====================
+      {
+        id: 6,
+        shortTitle: 'Fibonacci Tree',
+        title: 'Branching Calls (fib(4) Multi-Call Stack)',
+        conceptTag: 'Tree Recursion & Sequential Left-Then-Right Stack Frames',
+        fileName: 'FibonacciLab.java',
+        mainCall: 'System.out.println(fib(4));',
+        hint: 'Line 6 makes TWO recursive calls: fib(n - 1) + fib(n - 2). Java evaluates left-to-right, so the entire fib(n - 1) branch finishes and pops BEFORE fib(n - 2) is ever pushed!',
+        code: [
+          'public class FibonacciLab {',
+          '    public static int fib(int n) {',
+          '        if (n <= 1) {',
+          '            return n;',
+          '        }',
+          '        return fib(n - 1) + fib(n - 2);',
+          '    }',
+          '',
+          '    public static void main(String[] args) {',
+          '        System.out.println(fib(4));',
+          '    }',
+          '}'
+        ],
+        baseValidLines: [3, 4],
+        baseCanonicalLine: 3,
+        recursiveValidLines: [6],
+        recursiveCanonicalLine: 6,
+        stage1SuccessMsg: 'Masterful! Lines 3–4 (if (n <= 1) return n;) handle both base cases (fib(0) = 0 and fib(1) = 1). Line 6 performs branching recursion, calling fib(n - 1) first and then fib(n - 2) once the left call returns.',
+        stage2: {
+          question: 'With fib(0) = 0 and fib(1) = 1, what integer does fib(4) return and print?',
+          options: [
+            {
+              text: '3',
+              correct: true,
+              explanation: 'Correct! fib(0)=0, fib(1)=1, fib(2)=1+0=1, fib(3)=1+1=2, and fib(4)=fib(3)+fib(2)=2+1=3.'
+            },
+            {
+              text: '5',
+              correct: false,
+              explanation: '5 is fib(5). Remember indexing starts at fib(0) = 0, so fib(4) = 3.'
+            },
+            {
+              text: '4',
+              correct: false,
+              explanation: 'fib(n) adds the two previous Fibonacci numbers rather than returning n directly.'
+            },
+            {
+              text: '2',
+              correct: false,
+              explanation: '2 is fib(3). fib(4) adds fib(3) + fib(2) = 2 + 1 = 3.'
+            }
+          ]
+        },
+        takeaway: 'Even when a method branches into two recursive calls (fib(n - 1) + fib(n - 2)), the JVM Call Stack remains strictly sequential (depth-first, left-to-right). Notice also how fib(2) is computed twice—illustrating why naive recursion is O(2ⁿ)!',
+        steps: [
+          {
+            activeLine: 10,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'main() calls fib(4). Frame fib(n = 4) is pushed onto the Call Stack.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print fib(4)' },
+              { id: 'f1', depth: 1, signature: 'fib(n = 4)', line: 2, status: 'EXECUTING', detail: '4 <= 1 is false → moving to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'fib(4) evaluates left call fib(3) first (fib(2) waits). Pushes fib(3).',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print fib(4)' },
+              { id: 'f1', depth: 1, signature: 'fib(n = 4)', line: 6, status: 'PAUSED', detail: 'Left: fib(3) [running] | Right: fib(2) [queued]' },
+              { id: 'f2', depth: 2, signature: 'fib(n = 3)', line: 2, status: 'EXECUTING', detail: '3 <= 1 is false → moving to line 6' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'fib(3) evaluates its left call fib(2) first. Pushes fib(2).',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print fib(4)' },
+              { id: 'f1', depth: 1, signature: 'fib(n = 4)', line: 6, status: 'PAUSED', detail: 'Left: fib(3) | Right: fib(2) [queued]' },
+              { id: 'f2', depth: 2, signature: 'fib(n = 3)', line: 6, status: 'PAUSED', detail: 'Left: fib(2) [running] | Right: fib(1) [queued]' },
+              { id: 'f3', depth: 3, signature: 'fib(n = 2)', line: 2, status: 'EXECUTING', detail: '2 <= 1 is false → moving to line 6' }
+            ]
+          },
+          {
+            activeLine: 4,
+            phase: 'BASE_CASE',
+            consoleOutput: '',
+            narration: 'fib(2) calls left child fib(1), which hits base case n <= 1 and returns 1! Now fib(2) calls right child fib(0), which also hits base case n <= 1 and returns 0!',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print fib(4)' },
+              { id: 'f1', depth: 1, signature: 'fib(n = 4)', line: 6, status: 'PAUSED', detail: 'Left: fib(3) | Right: fib(2) [queued]' },
+              { id: 'f2', depth: 2, signature: 'fib(n = 3)', line: 6, status: 'PAUSED', detail: 'Left: fib(2) | Right: fib(1) [queued]' },
+              { id: 'f3', depth: 3, signature: 'fib(n = 2)', line: 6, status: 'RETURNING', detail: 'Left fib(1)=1 + Right fib(0)=0 → 1', returnValue: '1' }
+            ],
+            checkpoint: {
+              question: 'In fib(2), left call fib(1) returned 1 and right call fib(0) returned 0. What does fib(2) return?',
+              options: ['1', '0', '2'],
+              correctIndex: 0,
+              explanation: '1 + 0 = 1! Frame fib(2) pops and returns 1 to fib(3).'
+            }
+          },
+          {
+            activeLine: 6,
+            phase: 'UNWINDING',
+            consoleOutput: '',
+            narration: 'fib(3) received 1 from left child fib(2), then ran right child fib(1) (base case → 1). Now fib(3) computes 1 + 1 = 2!',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print fib(4)' },
+              { id: 'f1', depth: 1, signature: 'fib(n = 4)', line: 6, status: 'PAUSED', detail: 'Left: fib(3) | Right: fib(2) [queued]' },
+              { id: 'f2', depth: 2, signature: 'fib(n = 3)', line: 6, status: 'RETURNING', detail: 'Left fib(2)=1 + Right fib(1)=1 → 2', returnValue: '2' }
+            ],
+            checkpoint: {
+              question: 'In fib(3), left fib(2) = 1 and right fib(1) = 1. What does fib(3) return to fib(4)?',
+              options: ['2', '1', '3'],
+              correctIndex: 0,
+              explanation: '1 + 1 = 2! The entire left subtree of fib(4) is now complete and pops.'
+            }
+          },
+          {
+            activeLine: 6,
+            phase: 'WINDING',
+            consoleOutput: '',
+            narration: 'Now fib(4) has Left = 2, and finally pushes its RIGHT branch: fib(2)! (Notice fib(2) is recomputed from scratch!)',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print fib(4)' },
+              { id: 'f1', depth: 1, signature: 'fib(n = 4)', line: 6, status: 'PAUSED', detail: 'Left: 2 (done) | Right: fib(2) [running]' },
+              { id: 'f4', depth: 2, signature: 'fib(n = 2) [Right Branch]', line: 6, status: 'RETURNING', detail: 'fib(1)=1 + fib(0)=0 → returning 1', returnValue: '1' }
+            ]
+          },
+          {
+            activeLine: 6,
+            phase: 'UNWINDING',
+            consoleOutput: '',
+            narration: 'Right branch fib(2) popped and returned 1! Frame fib(4) now holds Left = 2 and Right = 1.',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'PAUSED', detail: 'Waiting to print fib(4)' },
+              { id: 'f1', depth: 1, signature: 'fib(n = 4)', line: 6, status: 'RETURNING', detail: 'Left (2) + Right (1) = 3 → returning 3', returnValue: '3' }
+            ],
+            checkpoint: {
+              question: 'fib(4) received 2 from fib(3) and 1 from fib(2). What final integer does fib(4) return?',
+              options: ['3', '5', '2'],
+              correctIndex: 0,
+              explanation: '2 + 1 = 3! Frame fib(4) pops and returns 3 to main().'
+            }
+          },
+          {
+            activeLine: 10,
+            phase: 'COMPLETE',
+            consoleOutput: '3\n',
+            narration: 'main() receives 3 and prints 3 to the console. All 6 ICS4U Recursion Rescue missions complete!',
+            frames: [
+              { id: 'f0', depth: 0, signature: 'main(args)', line: 10, status: 'RETURNING', detail: 'Printed 3 to console! All levels rescued!' }
+            ]
+          }
+        ]
+      }
+    ];
+
+    /**
+     * Application State
+     */
+    const state = {
+      currentLevelIdx: 0,
+      unlockedUpTo: 0, // 0-indexed (Level 1 unlocked initially)
+      completedLevels: new Set(),
+      xp: 0,
+      stage: 1, // 1: Identify Cases, 2: Predict Output, 3: Trace Call Stack
+      // Stage 1 state
+      tagMode: 'BASE', // 'BASE' | 'REC'
+      selectedBaseLine: null,
+      selectedRecLine: null,
+      stage1Verified: false,
+      stage1FirstTry: true,
+      // Stage 2 state
+      selectedOptionIdx: null,
+      stage2Answered: false,
+      stage2FirstTry: true,
+      // Stage 3 state
+      stepIdx: 0,
+      solvedCheckpoints: new Set(), // stores stepIdx values whose checkpoints have been answered
+      checkpointFirstTry: new Set()
+    };
+
+    /**
+     * Lightweight, safe Java Syntax Highlighter
+     */
+    function highlightJavaLine(rawLine) {
+      // Escape HTML entities first
+      let escaped = rawLine
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      if (!escaped.trim()) return '&nbsp;';
+
+      // Extract string & char literals temporarily so keywords inside strings aren't tokenized
+      const literals = [];
+      escaped = escaped.replace(/("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/g, (match) => {
+        const token = `__LIT_${literals.length}__`;
+        literals.push(`<span class="tok-str">${match}</span>`);
+        return token;
+      });
+
+      // Highlight Java keywords
+      escaped = escaped.replace(
+        /\b(public|private|protected|static|void|int|double|boolean|char|if|else|return|class|new)\b/g,
+        '<span class="tok-kw">$1</span>'
+      );
+
+      // Highlight common types / standard classes
+      escaped = escaped.replace(
+        /\b(String|System|args)\b/g,
+        '<span class="tok-type">$1</span>'
+      );
+
+      // Highlight method calls (word followed by opening parenthesis)
+      escaped = escaped.replace(
+        /\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\s*\()/g,
+        (match, fnName) => {
+          if (['if', 'while', 'for', 'return'].includes(fnName)) return fnName;
+          return `<span class="tok-method">${fnName}</span>`;
+        }
+      );
+
+      // Highlight standalone numbers
+      escaped = escaped.replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>');
+
+      // Restore string & char literals
+      literals.forEach((litHtml, idx) => {
+        escaped = escaped.replace(`__LIT_${idx}__`, litHtml);
+      });
+
+      return escaped;
+    }
+
+    /**
+     * Award XP with subtle badge pop animation
+     */
+    function addXP(amount) {
+      state.xp += amount;
+      const xpEl = document.getElementById('xp-value');
+      const badgeEl = document.getElementById('xp-badge');
+      xpEl.textContent = state.xp;
+      badgeEl.classList.add('scale-110', 'border-amber-400');
+      setTimeout(() => {
+        badgeEl.classList.remove('scale-110', 'border-amber-400');
+      }, 280);
+    }
+
+    /**
+     * Load a level and reset per-level stage progress
+     */
+    function selectLevel(idx) {
+      if (idx > state.unlockedUpTo) return;
+      LabAudio.click();
+      state.currentLevelIdx = idx;
+      state.stage = 1;
+      state.tagMode = 'BASE';
+      state.selectedBaseLine = null;
+      state.selectedRecLine = null;
+      state.stage1Verified = false;
+      state.stage1FirstTry = true;
+      state.selectedOptionIdx = null;
+      state.stage2Answered = false;
+      state.stage2FirstTry = true;
+      state.stepIdx = 0;
+      state.solvedCheckpoints = new Set();
+      state.checkpointFirstTry = new Set();
+
+      // Hide hint drawer on level change
+      document.getElementById('hint-drawer').classList.add('hidden');
+      renderAll();
+    }
+
+    /**
+     * Render Top Level Selector Tabs
+     */
+    function renderLevelNav() {
+      const nav = document.getElementById('level-nav');
+      nav.innerHTML = '';
+
+      LEVELS.forEach((lvl, idx) => {
+        const isCurrent = idx === state.currentLevelIdx;
+        const isCompleted = state.completedLevels.has(idx);
+        const isUnlocked = idx <= state.unlockedUpTo;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.disabled = !isUnlocked;
+
+        let baseClasses = 'flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono font-semibold border transition-all shrink-0 ';
+        if (isCurrent) {
+          baseClasses += 'bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-md shadow-cyan-500/15';
+        } else if (isCompleted) {
+          baseClasses += 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25';
+        } else if (isUnlocked) {
+          baseClasses += 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500';
+        } else {
+          baseClasses += 'bg-slate-950/60 border-slate-800/80 text-slate-600 cursor-not-allowed';
+        }
+
+        btn.className = baseClasses;
+
+        let iconHtml = '';
+        if (isCompleted) {
+          iconHtml = '<span class="text-emerald-400 font-bold">✓</span>';
+        } else if (!isUnlocked) {
+          iconHtml = '<span class="text-[11px]">🔒</span>';
+        } else {
+          iconHtml = `<span class="w-1.5 h-1.5 rounded-full ${isCurrent ? 'bg-cyan-400' : 'bg-slate-500'}"></span>`;
+        }
+
+        btn.innerHTML = `${iconHtml}<span>LVL ${lvl.id}</span><span class="hidden xl:inline text-[11px] opacity-80">· ${lvl.shortTitle}</span>`;
+        btn.addEventListener('click', () => selectLevel(idx));
+        nav.appendChild(btn);
+      });
+    }
+
+    /**
+     * Render Left Column Java IDE & Console
+     */
+    function renderIDEAndConsole() {
+      const lvl = LEVELS[state.currentLevelIdx];
+      document.getElementById('ide-filename').textContent = lvl.fileName;
+      document.getElementById('console-main-call').textContent = `Entry: ${lvl.mainCall}`;
+      document.getElementById('hint-text').textContent = lvl.hint;
+
+      // Update IDE status pill & Stage 1 toolbar visibility
+      const statusPill = document.getElementById('ide-status-pill');
+      const tagToolbar = document.getElementById('stage1-tag-toolbar');
+      const footerHint = document.getElementById('ide-footer-hint');
+
+      if (state.stage === 1) {
+        statusPill.textContent = 'Stage 1: Tag Mode';
+        statusPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-400/30';
+        tagToolbar.classList.remove('hidden');
+        footerHint.textContent = 'Click lines in the method to tag Base & Recursive cases.';
+      } else if (state.stage === 2) {
+        statusPill.textContent = 'Stage 2: Read & Predict';
+        statusPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-amber-500/15 text-amber-300 border border-amber-400/30';
+        tagToolbar.classList.add('hidden');
+        footerHint.textContent = 'Trace the logic mentally before predicting output.';
+      } else {
+        const currentStep = lvl.steps[state.stepIdx];
+        statusPill.textContent = `Executing Line ${currentStep.activeLine}`;
+        statusPill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-400/40';
+        tagToolbar.classList.add('hidden');
+        footerHint.textContent = '▶ indicates active JVM instruction pointer.';
+      }
+
+      // Style Stage 1 tag mode toggle buttons
+      const baseBtn = document.getElementById('mode-base-btn');
+      const recBtn = document.getElementById('mode-rec-btn');
+
+      if (state.tagMode === 'BASE') {
+        baseBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border bg-emerald-500/20 border-emerald-400 text-emerald-200 shadow-sm shadow-emerald-500/20';
+        recBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border bg-slate-800/80 border-slate-700 text-slate-400 hover:text-slate-200';
+      } else {
+        recBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border bg-purple-500/20 border-purple-400 text-purple-200 shadow-sm shadow-purple-500/20';
+        baseBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border bg-slate-800/80 border-slate-700 text-slate-400 hover:text-slate-200';
+      }
+
+      // Render Java Source Code Lines
+      const editorBody = document.getElementById('code-editor-body');
+      editorBody.innerHTML = '';
+      const activeExecLine = state.stage === 3 ? lvl.steps[state.stepIdx].activeLine : null;
+
+      lvl.code.forEach((lineText, idx) => {
+        const lineNum = idx + 1;
+        const row = document.createElement('div');
+        const isBaseTagged = state.selectedBaseLine === lineNum;
+        const isRecTagged = state.selectedRecLine === lineNum;
+        const isExecLine = activeExecLine === lineNum;
+
+        let rowClasses = 'code-line flex items-center justify-between px-3 sm:px-4 py-0.5 border-l-2 border-transparent ';
+        if (state.stage === 1 && lineText.trim() !== '') {
+          rowClasses += 'code-line-clickable cursor-pointer ';
+        }
+        if (isExecLine) {
+          rowClasses += 'code-line-exec ';
+        } else if (isBaseTagged) {
+          rowClasses += 'code-line-base ';
+        } else if (isRecTagged) {
+          rowClasses += 'code-line-rec ';
+        }
+
+        row.className = rowClasses;
+
+        // Left side: execution pointer + line number + syntax-highlighted code
+        const leftPart = document.createElement('div');
+        leftPart.className = 'flex items-center gap-2.5 min-w-0';
+
+        const pointerSpan = document.createElement('span');
+        pointerSpan.className = 'w-3.5 text-center font-bold text-cyan-400 shrink-0';
+        pointerSpan.textContent = isExecLine ? '▶' : '';
+
+        const numSpan = document.createElement('span');
+        numSpan.className = `w-5 text-right select-none shrink-0 ${isExecLine ? 'text-cyan-300 font-bold' : 'text-slate-600'}`;
+        numSpan.textContent = lineNum;
+
+        const codeSpan = document.createElement('code');
+        codeSpan.className = 'whitespace-pre text-slate-200';
+        codeSpan.innerHTML = highlightJavaLine(lineText);
+
+        leftPart.appendChild(pointerSpan);
+        leftPart.appendChild(numSpan);
+        leftPart.appendChild(codeSpan);
+        row.appendChild(leftPart);
+
+        // Right side: inline tag badges if tagged
+        if (isBaseTagged || isRecTagged) {
+          const badge = document.createElement('span');
+          if (isBaseTagged) {
+            badge.className = 'ml-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shrink-0';
+            badge.textContent = 'BASE CASE';
+          } else {
+            badge.className = 'ml-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-400/40 shrink-0';
+            badge.textContent = 'RECURSIVE';
+          }
+          row.appendChild(badge);
+        }
+
+        // Click handler in Stage 1 for tagging lines
+        if (state.stage === 1 && lineText.trim() !== '') {
+          row.addEventListener('click', () => {
+            if (state.stage1Verified) return;
+            LabAudio.click();
+            if (state.tagMode === 'BASE') {
+              state.selectedBaseLine = state.selectedBaseLine === lineNum ? null : lineNum;
+              if (state.selectedRecLine === lineNum) state.selectedRecLine = null;
+            } else {
+              state.selectedRecLine = state.selectedRecLine === lineNum ? null : lineNum;
+              if (state.selectedBaseLine === lineNum) state.selectedBaseLine = null;
+            }
+            renderAll();
+          });
+        }
+
+        editorBody.appendChild(row);
+      });
+
+      // Render Live Console Output
+      const consoleTextEl = document.getElementById('console-output-text');
+      const consoleStateEl = document.getElementById('console-state-label');
+      const consoleCountEl = document.getElementById('console-char-count');
+
+      if (state.stage < 3) {
+        consoleStateEl.textContent = 'STANDBY';
+        consoleStateEl.className = 'text-[11px] font-mono text-slate-500';
+        consoleTextEl.innerHTML = '<span class="text-slate-500 italic text-xs">// Complete Stages 1 &amp; 2 to execute and trace System.out...</span>';
+        consoleCountEl.textContent = '0 chars printed';
+      } else {
+        const currentStep = lvl.steps[state.stepIdx];
+        const out = currentStep.consoleOutput || '';
+        const isDone = currentStep.phase === 'COMPLETE';
+        consoleStateEl.textContent = isDone ? 'TERMINATED (EXIT 0)' : 'RUNNING';
+        consoleStateEl.className = isDone
+          ? 'text-[11px] font-mono text-emerald-400 font-bold'
+          : 'text-[11px] font-mono text-cyan-400 animate-pulse';
+
+        const escapedOut = out
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+
+        consoleTextEl.innerHTML = `${escapedOut}<span class="console-cursor"></span>`;
+        consoleCountEl.textContent = `${out.replace(/\n/g, '').length} chars printed`;
+      }
+    }
+
+    /**
+     * Render Right Column Mission Header & 3-Stage Stepper
+     */
+    function renderMissionHeaderAndStepper() {
+      const lvl = LEVELS[state.currentLevelIdx];
+      document.getElementById('mission-level-badge').textContent = `LEVEL ${lvl.id} OF ${LEVELS.length}`;
+      document.getElementById('mission-concept-tag').textContent = lvl.conceptTag;
+      document.getElementById('mission-title').textContent = lvl.title;
+
+      // Update Stepper Buttons (1, 2, 3)
+      [1, 2, 3].forEach((stepNum) => {
+        const btn = document.getElementById(`stepper-${stepNum}`);
+        const numBadge = document.getElementById(`stepper-${stepNum}-num`);
+        const isCurrent = state.stage === stepNum;
+        const isDone =
+          (stepNum === 1 && state.stage1Verified) ||
+          (stepNum === 2 && state.stage2Answered) ||
+          (stepNum === 3 && state.completedLevels.has(state.currentLevelIdx));
+        const isAccessible =
+          stepNum === 1 ||
+          (stepNum === 2 && state.stage1Verified) ||
+          (stepNum === 3 && state.stage2Answered);
+
+        btn.disabled = !isAccessible;
+
+        if (isCurrent) {
+          btn.className = 'flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all bg-cyan-500/15 border-cyan-400 text-white shadow-md shadow-cyan-500/10';
+          numBadge.className = 'w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 bg-cyan-400 text-slate-950';
+          numBadge.textContent = stepNum;
+        } else if (isDone) {
+          btn.className = 'flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all bg-emerald-500/10 border-emerald-500/40 text-emerald-200 hover:bg-emerald-500/20';
+          numBadge.className = 'w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 bg-emerald-500 text-slate-950';
+          numBadge.textContent = '✓';
+        } else if (isAccessible) {
+          btn.className = 'flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500';
+          numBadge.className = 'w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 bg-slate-800 text-slate-300';
+          numBadge.textContent = stepNum;
+        } else {
+          btn.className = 'flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all bg-slate-950/60 border-slate-800/80 text-slate-500 cursor-not-allowed';
+          numBadge.className = 'w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 bg-slate-900 text-slate-600';
+          numBadge.textContent = stepNum;
+        }
+      });
+
+      // Toggle visibility of Stage 1, 2, and 3 panels
+      document.getElementById('stage-1-panel').classList.toggle('hidden', state.stage !== 1);
+      document.getElementById('stage-2-panel').classList.toggle('hidden', state.stage !== 2);
+      document.getElementById('stage-3-panel').classList.toggle('hidden', state.stage !== 3);
+    }
+
+    /**
+     * Render Stage 1 Panel (Identify Base & Recursive Cases)
+     */
+    function renderStage1() {
+      const lvl = LEVELS[state.currentLevelIdx];
+      const baseBadge = document.getElementById('base-line-badge');
+      const basePreview = document.getElementById('base-line-preview');
+      const recBadge = document.getElementById('rec-line-badge');
+      const recPreview = document.getElementById('rec-line-preview');
+
+      if (state.selectedBaseLine) {
+        baseBadge.textContent = `Line ${state.selectedBaseLine}`;
+        baseBadge.className = 'text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/40';
+        basePreview.textContent = lvl.code[state.selectedBaseLine - 1].trim();
+        basePreview.className = 'font-mono text-xs text-emerald-200 truncate';
+      } else {
+        baseBadge.textContent = 'Not tagged';
+        baseBadge.className = 'text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+        basePreview.textContent = 'Select "Tag Base Case" & click a line in the IDE';
+        basePreview.className = 'font-mono text-xs text-slate-400 truncate';
+      }
+
+      if (state.selectedRecLine) {
+        recBadge.textContent = `Line ${state.selectedRecLine}`;
+        recBadge.className = 'text-xs font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-400/40';
+        recPreview.textContent = lvl.code[state.selectedRecLine - 1].trim();
+        recPreview.className = 'font-mono text-xs text-purple-200 truncate';
+      } else {
+        recBadge.textContent = 'Not tagged';
+        recBadge.className = 'text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+        recPreview.textContent = 'Select "Tag Recursive Call" & click a line in the IDE';
+        recPreview.className = 'font-mono text-xs text-slate-400 truncate';
+      }
+
+      const verifyBtn = document.getElementById('verify-stage1-btn');
+      verifyBtn.disabled = state.stage1Verified;
+      verifyBtn.classList.toggle('opacity-50', state.stage1Verified);
+
+      const fb = document.getElementById('stage1-feedback');
+      if (!state.stage1Verified && !fb.dataset.hasError) {
+        fb.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Render Stage 2 Panel (Predict Output)
+     */
+    function renderStage2() {
+      const lvl = LEVELS[state.currentLevelIdx];
+      document.getElementById('stage2-question').textContent = lvl.stage2.question;
+
+      const optionsContainer = document.getElementById('stage2-options');
+      optionsContainer.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+
+      lvl.stage2.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.disabled = state.stage2Answered;
+
+        const isSelected = state.selectedOptionIdx === idx;
+        let classes = 'p-3.5 rounded-xl border text-left transition-all flex items-center gap-3 ';
+
+        if (!state.stage2Answered) {
+          classes += 'bg-slate-900/90 hover:bg-slate-800/90 border-slate-700 hover:border-cyan-400/60 text-slate-200';
+        } else if (opt.correct) {
+          classes += 'bg-emerald-950/50 border-emerald-400 text-emerald-100 shadow-md shadow-emerald-500/15';
+        } else if (isSelected && !opt.correct) {
+          classes += 'bg-rose-950/50 border-rose-500 text-rose-200';
+        } else {
+          classes += 'bg-slate-900/40 border-slate-800 text-slate-500';
+        }
+
+        btn.className = classes;
+        btn.innerHTML = `
+          <span class="w-7 h-7 rounded-lg font-mono text-xs font-bold flex items-center justify-center shrink-0 ${
+            state.stage2Answered && opt.correct
+              ? 'bg-emerald-400 text-slate-950'
+              : isSelected && !opt.correct
+              ? 'bg-rose-500 text-white'
+              : 'bg-slate-800 text-cyan-300'
+          }">${letters[idx]}</span>
+          <code class="font-mono text-sm font-semibold break-all">${opt.text}</code>
+        `;
+
+        btn.addEventListener('click', () => handlePredictionChoice(idx));
+        optionsContainer.appendChild(btn);
+      });
+
+      const fb = document.getElementById('stage2-feedback');
+      if (!state.stage2Answered) {
+        fb.classList.add('hidden');
+      } else {
+        const chosen = lvl.stage2.options[state.selectedOptionIdx];
+        fb.classList.remove('hidden');
+        fb.className = chosen.correct
+          ? 'mt-4 p-4 rounded-xl border bg-emerald-950/40 border-emerald-500/40 text-emerald-100 text-sm leading-relaxed'
+          : 'mt-4 p-4 rounded-xl border bg-amber-950/40 border-amber-500/40 text-amber-100 text-sm leading-relaxed';
+
+        fb.innerHTML = `
+          <div class="font-bold mb-1 ${chosen.correct ? 'text-emerald-300' : 'text-amber-300'}">
+            ${chosen.correct ? '✓ Prediction Verified! (+100 XP)' : '⚠ Not quite — let’s verify why on the Call Stack!'}
+          </div>
+          <p class="mb-3">${chosen.explanation}</p>
+          <button id="goto-stage3-btn" type="button"
+            class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all">
+            Proceed to Stage 3: Trace Call Stack →
+          </button>
+        `;
+
+        document.getElementById('goto-stage3-btn').addEventListener('click', () => {
+          LabAudio.click();
+          state.stage = 3;
+          renderAll();
+        });
+      }
+    }
+
+    /**
+     * Handle Stage 2 Prediction Selection
+     */
+    function handlePredictionChoice(idx) {
+      if (state.stage2Answered) return;
+      const lvl = LEVELS[state.currentLevelIdx];
+      state.selectedOptionIdx = idx;
+      state.stage2Answered = true;
+
+      if (lvl.stage2.options[idx].correct) {
+        LabAudio.baseCase();
+        addXP(100);
+      } else {
+        LabAudio.error();
+      }
+      renderAll();
+    }
+
+    /**
+     * Render Stage 3 Panel (Visual Call Stack Step-Through)
+     */
+    function renderStage3() {
+      const lvl = LEVELS[state.currentLevelIdx];
+      const totalSteps = lvl.steps.length;
+      const step = lvl.steps[state.stepIdx];
+
+      // Phase badge & step counter
+      const phaseBadge = document.getElementById('trace-phase-badge');
+      document.getElementById('trace-step-counter').textContent = `Step ${state.stepIdx + 1} of ${totalSteps}`;
+      document.getElementById('trace-narration').textContent = step.narration;
+
+      if (step.phase === 'WINDING') {
+        phaseBadge.textContent = 'WINDING PHASE (PUSH)';
+        phaseBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-400/30';
+      } else if (step.phase === 'BASE_CASE') {
+        phaseBadge.textContent = 'BASE CASE REACHED!';
+        phaseBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40';
+      } else if (step.phase === 'UNWINDING') {
+        phaseBadge.textContent = 'UNWINDING PHASE (POP)';
+        phaseBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-400/40';
+      } else {
+        phaseBadge.textContent = 'EXECUTION COMPLETE';
+        phaseBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40';
+      }
+
+      // Check if current step has an unsolved checkpoint
+      const hasCheckpoint = Boolean(step.checkpoint);
+      const checkpointSolved = state.solvedCheckpoints.has(state.stepIdx);
+      const checkpointBlocked = hasCheckpoint && !checkpointSolved;
+
+      // Navigation buttons
+      const backBtn = document.getElementById('step-back-btn');
+      const fwdBtn = document.getElementById('step-forward-btn');
+
+      backBtn.disabled = state.stepIdx === 0;
+      fwdBtn.disabled = checkpointBlocked || state.stepIdx === totalSteps - 1;
+      fwdBtn.textContent =
+        state.stepIdx === totalSteps - 1
+          ? 'Trace Complete ✓'
+          : checkpointSolved
+          ? 'Continue Unwinding →'
+          : 'Step Forward →';
+
+      // Render Unwinding Checkpoint Box if present
+      const cpBox = document.getElementById('checkpoint-box');
+      if (hasCheckpoint) {
+        cpBox.classList.remove('hidden');
+        document.getElementById('checkpoint-question').textContent = step.checkpoint.question;
+        const cpOpts = document.getElementById('checkpoint-options');
+        const cpFb = document.getElementById('checkpoint-feedback');
+        cpOpts.innerHTML = '';
+
+        step.checkpoint.options.forEach((optText, oIdx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          const isCorrect = oIdx === step.checkpoint.correctIndex;
+
+          if (checkpointSolved && isCorrect) {
+            btn.className = 'p-2.5 rounded-xl border bg-emerald-500/20 border-emerald-400 text-emerald-200 font-mono text-xs font-bold text-left';
+            btn.innerHTML = `✓ ${optText}`;
+            btn.disabled = true;
+          } else if (checkpointSolved) {
+            btn.className = 'p-2.5 rounded-xl border bg-slate-900/50 border-slate-800 text-slate-500 font-mono text-xs text-left';
+            btn.textContent = optText;
+            btn.disabled = true;
+          } else {
+            btn.className = 'p-2.5 rounded-xl border bg-slate-900 hover:bg-slate-800 border-amber-500/40 hover:border-amber-400 text-slate-100 font-mono text-xs font-semibold text-left transition-all';
+            btn.textContent = optText;
+          }
+
+          btn.addEventListener('click', () => {
+            if (state.solvedCheckpoints.has(state.stepIdx)) return;
+            if (isCorrect) {
+              LabAudio.baseCase();
+              state.solvedCheckpoints.add(state.stepIdx);
+              addXP(25);
+              cpFb.className = 'mt-3 text-xs sm:text-sm rounded-lg p-2.5 border bg-emerald-950/60 border-emerald-500/40 text-emerald-200';
+              cpFb.textContent = `✓ ${step.checkpoint.explanation}`;
+              cpFb.classList.remove('hidden');
+              renderStage3();
+            } else {
+              LabAudio.error();
+              cpFb.className = 'mt-3 text-xs sm:text-sm rounded-lg p-2.5 border bg-rose-950/60 border-rose-500/40 text-rose-200';
+              cpFb.textContent = 'Not quite—check the parameter n and expression inside the active stack frame above, then try again!';
+              cpFb.classList.remove('hidden');
+            }
+          });
+
+          cpOpts.appendChild(btn);
+        });
+
+        if (checkpointSolved) {
+          cpFb.className = 'mt-3 text-xs sm:text-sm rounded-lg p-2.5 border bg-emerald-950/60 border-emerald-500/40 text-emerald-200';
+          cpFb.textContent = `✓ ${step.checkpoint.explanation}`;
+          cpFb.classList.remove('hidden');
+        } else {
+          cpFb.classList.add('hidden');
+        }
+      } else {
+        cpBox.classList.add('hidden');
+      }
+
+      // Render Visual LIFO Call Stack Frames (Top of Stack rendered first visually, stacking upward from base)
+      const framesContainer = document.getElementById('call-stack-frames');
+      framesContainer.innerHTML = '';
+      document.getElementById('stack-depth-badge').textContent = `Active Frames: ${step.frames.length}`;
+
+      // Reverse copy so TOP OF STACK is at top of visual column and main(args) is anchored at bottom
+      const visualOrderFrames = [...step.frames].reverse();
+
+      visualOrderFrames.forEach((frame, vIdx) => {
+        const isTop = vIdx === 0;
+        const card = document.createElement('div');
+
+        let borderAndGlow = 'bg-[#0f182c] border-slate-700/90 ';
+        if (isTop && frame.status === 'BASE_CASE') {
+          borderAndGlow = 'bg-emerald-950/40 border-emerald-400 frame-base-glow animate-frame-push ';
+        } else if (isTop && frame.status === 'RETURNING') {
+          borderAndGlow = 'bg-purple-950/40 border-purple-400 frame-active-glow ';
+        } else if (isTop) {
+          borderAndGlow = 'bg-[#12203b] border-cyan-400 frame-active-glow animate-frame-push ';
+        }
+
+        card.className = `p-3.5 rounded-xl border transition-all ${borderAndGlow}`;
+
+        // Status Pill styling
+        let statusPillHtml = '';
+        if (frame.status === 'BASE_CASE') {
+          statusPillHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">BASE CASE REACHED</span>';
+        } else if (frame.status === 'RETURNING') {
+          statusPillHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/40">POPPING / RETURNING</span>';
+        } else if (frame.status === 'PAUSED') {
+          statusPillHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-500/15 text-amber-300 border border-amber-400/30">PAUSED (Waiting)</span>';
+        } else {
+          statusPillHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">EXECUTING</span>';
+        }
+
+        const memAddr = `0x7FF${frame.depth}`;
+
+        card.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+            <div class="flex items-center gap-2">
+              <span class="px-1.5 py-0.5 rounded bg-slate-950 font-mono text-[10px] text-slate-400 border border-slate-800">
+                Frame #${frame.depth} · ${memAddr}
+              </span>
+              <code class="font-mono text-xs sm:text-sm font-bold ${isTop ? 'text-white' : 'text-slate-300'}">
+                ${frame.signature}
+              </code>
+              ${isTop ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-cyan-400 text-slate-950">TOP OF STACK</span>' : ''}
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-[11px] text-slate-400">Line ${frame.line}</span>
+              ${statusPillHtml}
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+            <span class="${isTop ? 'text-slate-200' : 'text-slate-400'}">${frame.detail}</span>
+            ${
+              frame.returnValue !== undefined
+                ? `<span class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold">Return → ${frame.returnValue}</span>`
+                : ''
+            }
+          </div>
+        `;
+
+        framesContainer.appendChild(card);
+      });
+
+      // Handle Level Completion Card
+      const rescuedCard = document.getElementById('level-rescued-card');
+      if (step.phase === 'COMPLETE') {
+        if (!state.completedLevels.has(state.currentLevelIdx)) {
+          state.completedLevels.add(state.currentLevelIdx);
+          if (state.currentLevelIdx + 1 < LEVELS.length) {
+            state.unlockedUpTo = Math.max(state.unlockedUpTo, state.currentLevelIdx + 1);
+          }
+          addXP(150);
+          LabAudio.rescue();
+          renderLevelNav();
+        }
+
+        rescuedCard.classList.remove('hidden');
+        document.getElementById('rescued-title').textContent = `Level ${lvl.id} Rescued! (${lvl.shortTitle})`;
+        document.getElementById('rescued-takeaway').textContent = lvl.takeaway;
+
+        const nextBtn = document.getElementById('next-level-btn');
+        if (state.currentLevelIdx + 1 < LEVELS.length) {
+          nextBtn.textContent = `Unlock Level ${lvl.id + 1}: ${LEVELS[state.currentLevelIdx + 1].shortTitle} →`;
+        } else {
+          nextBtn.textContent = '🎉 All 6 Levels Rescued! Replay Level 1';
+        }
+      } else {
+        rescuedCard.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Master Render Orchestrator
+     */
+    function renderAll() {
+      renderLevelNav();
+      renderIDEAndConsole();
+      renderMissionHeaderAndStepper();
+      renderStage1();
+      renderStage2();
+      renderStage3();
+    }
+
+    /**
+     * Wire up Event Listeners on Window Load
+     */
+    window.onload = function () {
+      // Stage 1 Tag Mode Toggles
+      document.getElementById('mode-base-btn').addEventListener('click', () => {
+        LabAudio.click();
+        state.tagMode = 'BASE';
+        renderIDEAndConsole();
+      });
+
+      document.getElementById('mode-rec-btn').addEventListener('click', () => {
+        LabAudio.click();
+        state.tagMode = 'REC';
+        renderIDEAndConsole();
+      });
+
+      document.getElementById('clear-tags-btn').addEventListener('click', () => {
+        if (state.stage1Verified) return;
+        LabAudio.click();
+        state.selectedBaseLine = null;
+        state.selectedRecLine = null;
+        const fb = document.getElementById('stage1-feedback');
+        delete fb.dataset.hasError;
+        fb.classList.add('hidden');
+        renderAll();
+      });
+
+      // Stage 1 Verify Structure Button
+      document.getElementById('verify-stage1-btn').addEventListener('click', () => {
+        const lvl = LEVELS[state.currentLevelIdx];
+        const fb = document.getElementById('stage1-feedback');
+
+        if (!state.selectedBaseLine || !state.selectedRecLine) {
+          LabAudio.error();
+          fb.dataset.hasError = 'true';
+          fb.className = 'mt-4 p-4 rounded-xl border bg-amber-950/40 border-amber-500/40 text-amber-200 text-sm';
+          fb.textContent = 'Please tag both a Base Case line (emerald) and a Recursive Call line (purple) in the Java code editor first.';
+          fb.classList.remove('hidden');
+          return;
+        }
+
+        const baseOk = lvl.baseValidLines.includes(state.selectedBaseLine);
+        const recOk = lvl.recursiveValidLines.includes(state.selectedRecLine);
+
+        if (baseOk && recOk) {
+          LabAudio.baseCase();
+          delete fb.dataset.hasError;
+          state.stage1Verified = true;
+          addXP(state.stage1FirstTry ? 75 : 40);
+
+          fb.className = 'mt-4 p-4 rounded-xl border bg-emerald-950/40 border-emerald-500/40 text-emerald-100 text-sm leading-relaxed';
+          fb.innerHTML = `
+            <div class="font-bold text-emerald-300 mb-1">✓ Recursive Structure Verified!</div>
+            <p class="mb-3">${lvl.stage1SuccessMsg}</p>
+            <button id="goto-stage2-btn" type="button"
+              class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all">
+              Proceed to Stage 2: Predict Output →
+            </button>
+          `;
+          fb.classList.remove('hidden');
+
+          document.getElementById('goto-stage2-btn').addEventListener('click', () => {
+            LabAudio.click();
+            state.stage = 2;
+            renderAll();
+          });
+
+          renderAll();
+        } else {
+          LabAudio.error();
+          state.stage1FirstTry = false;
+          fb.dataset.hasError = 'true';
+          let hintDetail = '';
+          if (!baseOk && !recOk) {
+            hintDetail = 'Check both tags: look for the if-condition that stops recursion (Base Case) and the line where the method calls itself (Recursive Call).';
+          } else if (!baseOk) {
+            hintDetail = `Your Recursive Call on Line ${state.selectedRecLine} is right! Re-check the Base Case: look for the if-statement that returns without recursing.`;
+          } else {
+            hintDetail = `Your Base Case on Line ${state.selectedBaseLine} is right! Re-check the Recursive Call: look for the line inside the method that invokes itself.`;
+          }
+
+          fb.className = 'mt-4 p-4 rounded-xl border bg-rose-950/40 border-rose-500/40 text-rose-200 text-sm leading-relaxed';
+          fb.innerHTML = `<div class="font-bold text-rose-300 mb-1">✗ Structure Mismatch</div><p>${hintDetail}</p>`;
+          fb.classList.remove('hidden');
+        }
+      });
+
+      // Stepper Tabs Navigation
+      [1, 2, 3].forEach((stepNum) => {
+        document.getElementById(`stepper-${stepNum}`).addEventListener('click', () => {
+          LabAudio.click();
+          state.stage = stepNum;
+          renderAll();
+        });
+      });
+
+      // Stage 3 Step Forward / Back / Reset
+      document.getElementById('step-forward-btn').addEventListener('click', () => {
+        const lvl = LEVELS[state.currentLevelIdx];
+        const currentStep = lvl.steps[state.stepIdx];
+        if (currentStep.checkpoint && !state.solvedCheckpoints.has(state.stepIdx)) return;
+
+        if (state.stepIdx + 1 < lvl.steps.length) {
+          state.stepIdx++;
+          const nextStep = lvl.steps[state.stepIdx];
+          if (nextStep.phase === 'UNWINDING') {
+            LabAudio.pop();
+          } else if (nextStep.phase === 'BASE_CASE') {
+            LabAudio.baseCase();
+          } else {
+            LabAudio.push();
+          }
+          renderAll();
+        }
+      });
+
+      document.getElementById('step-back-btn').addEventListener('click', () => {
+        if (state.stepIdx > 0) {
+          LabAudio.click();
+          state.stepIdx--;
+          renderAll();
+        }
+      });
+
+      document.getElementById('reset-trace-btn').addEventListener('click', () => {
+        LabAudio.click();
+        state.stepIdx = 0;
+        state.solvedCheckpoints = new Set();
+        renderAll();
+      });
+
+      // Replay & Next Level Buttons
+      document.getElementById('replay-level-btn').addEventListener('click', () => {
+        selectLevel(state.currentLevelIdx);
+      });
+
+      document.getElementById('next-level-btn').addEventListener('click', () => {
+        if (state.currentLevelIdx + 1 < LEVELS.length) {
+          selectLevel(state.currentLevelIdx + 1);
+        } else {
+          selectLevel(0);
+        }
+      });
+
+      // Hint Drawer Toggle
+      document.getElementById('toggle-hint-btn').addEventListener('click', () => {
+        LabAudio.click();
+        document.getElementById('hint-drawer').classList.toggle('hidden');
+      });
+
+      // Sound Toggle
+      document.getElementById('sound-toggle-btn').addEventListener('click', () => {
+        const isOn = LabAudio.toggle();
+        document.getElementById('sound-on-icon').classList.toggle('hidden', !isOn);
+        document.getElementById('sound-off-icon').classList.toggle('hidden', isOn);
+        if (isOn) LabAudio.click();
+      });
+
+      // Recursion Field Guide Modal
+      const guideModal = document.getElementById('field-guide-modal');
+      document.getElementById('open-guide-btn').addEventListener('click', () => {
+        LabAudio.click();
+        guideModal.classList.remove('hidden');
+      });
+
+      document.getElementById('close-guide-btn').addEventListener('click', () => {
+        LabAudio.click();
+        guideModal.classList.add('hidden');
+      });
+
+      guideModal.addEventListener('click', (e) => {
+        if (e.target === guideModal) {
+          guideModal.classList.add('hidden');
+        }
+      });
+
+      document.getElementById('unlock-all-btn').addEventListener('click', () => {
+        LabAudio.baseCase();
+        state.unlockedUpTo = LEVELS.length - 1;
+        guideModal.classList.add('hidden');
+        renderLevelNav();
+      });
+
+      // Initial render
+      renderAll();
+    };
+  </script>
+</body>
+</html>
